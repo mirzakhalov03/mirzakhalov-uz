@@ -1,0 +1,20 @@
+node_modules/
+dist/
+build/
+.turbo/
+
+# env — .env.example is committed, real envs never are
+.env
+.env.*
+!.env.example
+
+# uploads live on a persistent volume, never in git (§7)
+uploads/
+
+*.log
+npm-debug.log*
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+coverage/

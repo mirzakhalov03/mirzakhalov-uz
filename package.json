@@ -1,0 +1,19 @@
+{
+  "name": "portfolio",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run dev -w @portfolio/api",
+    "dev:web": "npm run dev -w @portfolio/web",
+    "build": "npm run build -w @portfolio/api && npm run build -w @portfolio/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

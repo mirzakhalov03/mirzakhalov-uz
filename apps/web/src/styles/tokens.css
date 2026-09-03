@@ -1,0 +1,113 @@
+/**
+ * Every value from the design doc §3, in one file.
+ * TypeScript never imports a colour — components reference var(--violet).
+ *
+ * The three surfaces are a token swap, not three stylesheets:
+ *   :root                    → void ground (default)
+ *   [data-surface="plate"]   → raised panel
+ *   [data-surface="bone"]    → reading surface, and print
+ */
+
+:root {
+  /* --- colour: void ground --- */
+  --void: #0c0a14;
+  --plate: #141126;
+  --plate-2: #1b1733;
+
+  --bone: #ede7da;
+  --bone-60: #9a9488;
+  --bone-30: rgba(237, 231, 218, 0.3);
+
+  --violet: #684fff;
+  --violet-hot: #8a73ff;
+  --violet-deep: #4a32d6;
+
+  --brass: #e0b252;
+  --mint: #5bd6a0;
+  --rose: #ff7a7a;
+
+  --line: rgba(237, 231, 218, 0.16);
+  --grid: rgba(104, 79, 255, 0.09);
+  --grid-major: rgba(104, 79, 255, 0.17);
+
+  /* semantic aliases — components use these, not the raw names above */
+  --surface: var(--void);
+  --surface-raised: var(--plate);
+  --surface-well: var(--plate-2);
+  --text: var(--bone);
+  --text-muted: var(--bone-60);
+  --text-disabled: var(--bone-30);
+  --link: var(--violet-hot);
+
+  /* --- spacing: 8px base, 32px module, 256px major --- */
+  --u: 8px;
+  --s2: 16px;
+  --s3: 24px;
+  --s4: 32px;
+  --s5: 48px;
+  --s6: 64px;
+  --s7: 96px;
+  --s8: 128px;
+
+  --content-max: 1280px;
+  --measure: 62ch; /* prose capped at 60–64 characters */
+  --gutter: var(--s3);
+  --section-padding: var(--s4);
+
+  /* --- type --- */
+  --font-sans: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  --font-display: 'Days One', var(--font-sans);
+
+  --text-hero: clamp(3.25rem, 10.5vw, 7.25rem);
+  --text-h2: clamp(1.75rem, 4.5vw, 2.75rem);
+  --text-h3: 1.625rem;
+  --text-h4: 1.125rem;
+  --text-lede: 1.1875rem;
+  --text-body: 1.0625rem;
+  --text-data: 0.6875rem;
+  --text-data-lg: 0.8125rem;
+  --text-numeral: 2.125rem;
+
+  /* --- form --- */
+  --radius: 0; /* everywhere. no exceptions. */
+  --border: 1px solid var(--line);
+  --focus-ring: 2px solid var(--violet-hot);
+  --focus-offset: 3px;
+
+  /* --- motion --- */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 120ms;
+  --duration: 200ms;
+}
+
+[data-surface='plate'] {
+  --surface: var(--plate);
+  --surface-raised: var(--plate-2);
+}
+
+/* Reading surface, and the print stylesheet. Roles invert; tokens do not change name. */
+[data-surface='bone'] {
+  --surface: var(--bone);
+  --surface-raised: #f6f2e9;
+  --surface-well: #e6dfd0;
+  --text: var(--void);
+  --text-muted: #4a4640;
+  --text-disabled: rgba(12, 10, 20, 0.4);
+  --link: var(--violet-deep);
+  --line: rgba(12, 10, 20, 0.18);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --section-padding: var(--s5);
+    --gutter: var(--s4);
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --section-padding: var(--s6);
+    --gutter: var(--s5);
+  }
+}
