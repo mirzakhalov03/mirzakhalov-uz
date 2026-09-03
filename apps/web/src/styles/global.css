@@ -1,84 +1,127 @@
+@import 'tailwindcss';
+
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
+@import '@fontsource/days-one/latin-400.css';
+
 @import './tokens.css';
+@import './theme.css';
+@import './substrate.css';
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+@source '../';
+
+@layer base {
+  * {
+    margin: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* The sticky bar is 56px; anchors clear it plus one module. */
+    scroll-padding-top: 88px;
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.65;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  img,
+  picture,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-underline-offset: 0.2em;
+  }
+
+  /* Designed to be seen constantly, so it should look intentional (§7.2). */
+  :focus-visible {
+    outline: 2px solid var(--accent-text);
+    outline-offset: 3px;
+  }
+
+  /* Free, and one of those details that reads as care (§7.2). */
+  ::selection {
+    background-color: var(--color-violet);
+    color: var(--color-bone);
+  }
+
+  [data-numeric],
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Only the causal micro-transitions are flattened. The set-pieces handle
+     themselves per-animation (§7.4) — a blanket kill would strip meaning from
+     animations whose whole job is to show what changed. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-* {
-  margin: 0;
+@utility prose-measure {
+  max-width: 62ch;
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
-}
+/* Long-form on the dark ground is worse, not braver (§2 principle 7).
+   The plate fills its column; the measure is held on the text inside it, so the
+   reading surface has a clean edge and the line length is still capped. */
+@utility prose-plate {
+  & p,
+  & li,
+  & blockquote {
+    max-width: 62ch;
+  }
 
-body {
-  background: var(--surface);
-  color: var(--text);
-  font-family: var(--font-sans);
-  font-size: var(--text-body);
-  line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100dvh;
-}
+  & p + p {
+    margin-top: 1.25em;
+  }
 
-img,
-picture,
-svg,
-video {
-  display: block;
-  max-width: 100%;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-}
-
-a {
-  color: var(--link);
-  text-underline-offset: 0.2em;
-}
-
-/* Focus is designed to look intentional — keyboard users see it constantly. */
-:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-offset);
-}
-
-/* Numbers that sit in a column line up. */
-[data-numeric],
-table {
-  font-variant-numeric: tabular-nums;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  & a {
+    color: var(--accent-text);
+    text-decoration: underline;
   }
 }
 
 .skip-link {
-  position: absolute;
-  left: var(--s2);
-  top: -100%;
-  z-index: 100;
-  padding: var(--u) var(--s2);
-  background: var(--surface-well);
-  border: var(--border);
+  position: fixed;
+  left: 16px;
+  top: -100px;
+  z-index: 200;
+  padding: 8px 16px;
+  background-color: var(--surface-well);
+  border: 1px solid var(--line);
   font-family: var(--font-mono);
   font-size: var(--text-data-lg);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: top var(--duration-micro) var(--ease-plate);
 }
 
 .skip-link:focus-visible {
-  top: var(--s2);
+  top: 16px;
 }

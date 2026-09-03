@@ -1,0 +1,356 @@
+/**
+ * The parts Tailwind is the wrong tool for: the construction grid, the
+ * registration marks, the variable-width type treatments, and the motion
+ * timelines. Everything else in the app is utilities.
+ */
+
+/* ==========================================================================
+   The construction grid — 32px module, 256px major (§3.3)
+   A fixed CSS-gradient layer. Never an image, never a canvas: it has to be
+   free to paint, because it is on every page at all times (§7.4).
+   ========================================================================== */
+
+.substrate {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--surface);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: center top;
+}
+
+/* The major rule crowds a phone screen, so below 640px the module stands alone. */
+@media (min-width: 640px) {
+  .substrate {
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
+      linear-gradient(to right, var(--grid-major) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-major) 1px, transparent 1px);
+    background-size:
+      32px 32px,
+      32px 32px,
+      256px 256px,
+      256px 256px;
+  }
+}
+
+/* The drawing surface lags behind the content resting on it. Scroll-linked,
+   so it only ever moves when the reader does — no idle animation. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .substrate {
+      animation: substrate-lag linear both;
+      animation-timeline: scroll(root block);
+      will-change: transform;
+    }
+  }
+}
+
+@keyframes substrate-lag {
+  to {
+    transform: translate3d(0, 96px, 0);
+  }
+}
+
+/* ==========================================================================
+   Registration marks — the separation device that replaces shadow (§3.4)
+   Four violet corner crosses, drawn as eight gradients on one pseudo-element,
+   so a plate costs no extra DOM.
+   ========================================================================== */
+
+.marks {
+  position: relative;
+}
+
+.marks::after {
+  content: '';
+  position: absolute;
+  /* The pseudo-element overhangs by half an arm, so every cross can be placed
+     with positive offsets. Negative offsets in the four-value background-position
+     syntax are parsed inconsistently and silently drop the whole declaration. */
+  --arm: 13px;
+  --w: 1px;
+  inset: calc(var(--arm) / -2);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.4;
+  transition: opacity var(--duration-micro) var(--ease-plate);
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--mark), var(--mark)), linear-gradient(var(--mark), var(--mark)),
+    linear-gradient(var(--mark), var(--mark)), linear-gradient(var(--mark), var(--mark)),
+    linear-gradient(var(--mark), var(--mark)), linear-gradient(var(--mark), var(--mark)),
+    linear-gradient(var(--mark), var(--mark)), linear-gradient(var(--mark), var(--mark));
+  background-size:
+    var(--arm) var(--w), var(--w) var(--arm),
+    var(--arm) var(--w), var(--w) var(--arm),
+    var(--arm) var(--w), var(--w) var(--arm),
+    var(--arm) var(--w), var(--w) var(--arm);
+  /* --mid centres an arm on the plate corner within the overhanging box. */
+  --mid: calc((var(--arm) - var(--w)) / 2);
+  background-position:
+    left 0 top var(--mid),
+    left var(--mid) top 0,
+    right 0 top var(--mid),
+    right var(--mid) top 0,
+    left 0 bottom var(--mid),
+    left var(--mid) bottom 0,
+    right 0 bottom var(--mid),
+    right var(--mid) bottom 0;
+}
+
+.marks:hover::after,
+.marks:focus-within::after,
+.marks[data-marked='true']::after {
+  opacity: 1;
+}
+
+/* Reduced motion shows the marks at full at rest — nothing loses meaning. */
+@media (prefers-reduced-motion: reduce) {
+  .marks::after {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   Type treatments — the variable width axis is the design's voice (§3.1)
+   Archivo's wdth axis runs 62–125. Display type is genuinely condensed rather
+   than squashed, which is why there is no second display family.
+   ========================================================================== */
+
+.t-hero,
+.t-h2,
+.t-h3 {
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.t-hero {
+  font-size: var(--text-hero);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  font-variation-settings: 'wght' 800, 'wdth' 74;
+}
+
+.t-h2 {
+  font-size: var(--text-h2);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  font-variation-settings: 'wght' 800, 'wdth' 78;
+}
+
+.t-h3 {
+  font-size: var(--text-h3);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variation-settings: 'wght' 700, 'wdth' 84;
+}
+
+.t-h4 {
+  font-size: var(--text-h4);
+  line-height: 1.44;
+  font-variation-settings: 'wght' 600, 'wdth' 100;
+}
+
+/* The mono metadata primitive. Restricted by principle 5 to real data only —
+   coordinates, dates, stacks, versions, statuses. Never a heading, never prose. */
+.t-data {
+  font-family: var(--font-mono);
+  font-size: var(--text-data);
+  line-height: 1.45;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-variation-settings: 'wght' 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.t-data-lg {
+  font-family: var(--font-mono);
+  font-size: var(--text-data-lg);
+  line-height: 1.54;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variation-settings: 'wght' 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.t-numeral {
+  font-family: var(--font-display);
+  font-size: var(--text-numeral);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Motion — scroll-linked structure, and the two deliberate set-pieces
+   Content itself never animates on scroll (§2 principle 4). What moves with
+   the scroll is the drawing furniture: the substrate, the progress rule, the
+   rosette. Every one of these has a correct resting state without the timeline.
+   ========================================================================== */
+
+.rule-progress {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.rosette-turn {
+  transform-origin: 50% 50%;
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rule-progress {
+      animation: rule-advance linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    /* Exactly 22.5° — half the girih's 45° point spacing, so the star turns
+       from its rest position into its own generating-square position and
+       stops. A derivable rotation, not an arbitrary one (§2 principle 1). */
+    .rosette-turn {
+      animation: rosette-turn linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@keyframes rule-advance {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes rosette-turn {
+  from {
+    rotate: -11.25deg;
+  }
+  to {
+    rotate: 11.25deg;
+  }
+}
+
+/* The construction. Runs once, on first load, on one element (§4.2). */
+@keyframes construct-draw {
+  from {
+    stroke-dashoffset: var(--len, 1);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes construct-fill {
+  from {
+    fill-opacity: 0;
+  }
+  to {
+    fill-opacity: 0.16;
+  }
+}
+
+.construct-line {
+  stroke-dasharray: var(--len, 1);
+  stroke-dashoffset: 0;
+}
+
+.construct-fill {
+  fill-opacity: 0.16;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .construct-line {
+    animation: construct-draw 1s var(--ease-plate) both;
+    animation-delay: var(--delay, 0ms);
+  }
+
+  .construct-fill {
+    animation: construct-fill 0.6s var(--ease-plate) both;
+    animation-delay: 900ms;
+  }
+}
+
+/* ==========================================================================
+   View transitions — the index plate morphs into the case-study hero (§4.4)
+   Six lines, off the main thread, and it degrades to an instant cut.
+   ========================================================================== */
+
+/* React Router drives these for SPA navigation via <Link viewTransition>; the
+   cross-document @view-transition rule would do nothing here. */
+::view-transition-group(*) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   The signature signs (§4.7)
+   A clip-path wipe over a faint ghost of the same mark. Metaphor and mechanic
+   agree — signed, then sent — and it reuses an asset already in the repo
+   instead of showing a generic green toast.
+   ========================================================================== */
+
+.signature {
+  -webkit-mask-image: var(--signature-src);
+  mask-image: var(--signature-src);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: left center;
+  mask-position: left center;
+  background-color: currentColor;
+}
+
+.signature-ink {
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .signature-ink {
+    animation: signature-sign 800ms cubic-bezier(0.4, 0, 0.15, 1) both;
+  }
+}
+
+@keyframes signature-sign {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ==========================================================================
+   Screenshot grade (§4.3)
+   Graded back at rest, full colour on hover — so the work itself is the thing
+   that lights up, while every plate stays exactly where it was.
+   ========================================================================== */
+
+.screenshot {
+  filter: grayscale(0.55);
+  transition: filter 220ms var(--ease-plate);
+}
+
+.group:hover .screenshot,
+.group:focus-visible .screenshot {
+  filter: grayscale(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screenshot {
+    filter: none;
+  }
+}

@@ -1,0 +1,114 @@
+/**
+ * Two independent axes, one set of semantic names.
+ *
+ *   [data-theme]    what the page ground is        — light | dark
+ *   [data-surface]  what THIS element is           — void | bone | plate
+ *
+ * The point of separating them: a bone plate is warm paper whatever the theme,
+ * and a void plate is a hard dark block whatever the theme. So dark mode gets
+ * light reading islands (design doc principle 7) and light mode gets the same
+ * strong-contrast composition inverted — one mechanism, both directions.
+ *
+ * Because custom properties inherit from the nearest ancestor that sets them,
+ * a [data-surface] on a descendant simply wins for its own subtree. No
+ * specificity juggling, no !important, no second stylesheet.
+ */
+
+/* --- the void value set ---------------------------------------------------
+ * Contrast on #0c0a14: bone 15.9:1 · bone-60 6.5:1 · violet-hot 5.6:1
+ * · brass 10.0:1 · mint 10.8:1 · rose 7.8:1. Computed, not estimated. */
+:root,
+[data-theme='dark'],
+[data-surface='void'] {
+  color-scheme: dark;
+
+  --surface: var(--color-void);
+  --surface-raised: var(--color-plate);
+  --surface-well: var(--color-plate-2);
+
+  --fg: var(--color-bone);
+  --fg-muted: #9a9488;
+  --fg-subtle: rgb(237 231 218 / 0.3);
+
+  --line: rgb(237 231 218 / 0.16);
+  --line-strong: rgb(237 231 218 / 0.34);
+
+  --accent: var(--color-violet);
+  --accent-text: var(--color-violet-hot);
+  --measured: var(--color-brass);
+  --measured-rule: var(--color-brass);
+  --live: var(--color-mint);
+  --danger: var(--color-rose);
+
+  --grid: rgb(104 79 255 / 0.09);
+  --grid-major: rgb(104 79 255 / 0.17);
+  --mark: var(--color-violet);
+
+  --shade: rgb(0 0 0 / 0.6);
+}
+
+/* --- the bone value set ---------------------------------------------------
+ * Contrast on #ede7da: void 15.9:1 · violet-deep 6.3:1 · mint-deep 5.5:1
+ * · rose-deep 5.3:1. Brass is a rule or mark only here — the obvious deep
+ * brass lands at 4.35:1, just under AA, so rather than invent a fourth brass
+ * the measured numeral goes to void and the dimension bar stays brass (§3.2). */
+[data-theme='light'],
+[data-surface='bone'] {
+  color-scheme: light;
+
+  --surface: var(--color-bone);
+  --surface-raised: var(--color-bone-raised);
+  --surface-well: var(--color-bone-well);
+
+  --fg: var(--color-void);
+  --fg-muted: #4a4640;
+  --fg-subtle: rgb(12 10 20 / 0.4);
+
+  --line: rgb(12 10 20 / 0.18);
+  --line-strong: rgb(12 10 20 / 0.38);
+
+  --accent: var(--color-violet);
+  --accent-text: var(--color-violet-deep);
+  --measured: var(--color-void);
+  --measured-rule: #b98a2c;
+  --live: var(--color-mint-deep);
+  --danger: var(--color-rose-deep);
+
+  --grid: rgb(74 50 214 / 0.1);
+  --grid-major: rgb(74 50 214 / 0.2);
+  --mark: var(--color-violet-deep);
+
+  --shade: rgb(12 10 20 / 0.42);
+}
+
+/* A raised panel keeps its theme's palette and only steps the fill up one. */
+[data-surface='plate'] {
+  --surface: var(--surface-raised);
+  --surface-well: var(--surface-well);
+}
+
+/**
+ * Expose the semantic layer to Tailwind. `inline` is what makes this work:
+ * it emits `var(--surface)` rather than resolving to a literal at build time,
+ * so `bg-surface` follows the live value and the theme swap is one attribute.
+ */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-raised: var(--surface-raised);
+  --color-well: var(--surface-well);
+
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-measured: var(--measured);
+  --color-measured-rule: var(--measured-rule);
+  --color-live: var(--live);
+  --color-danger: var(--danger);
+  --color-mark: var(--mark);
+}

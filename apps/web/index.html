@@ -1,12 +1,39 @@
 <!doctype html>
-<html lang="en" data-surface="void">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#0C0A14" />
-    <title>Javohir Mirzakhalov</title>
-    <meta name="description" content="Portfolio, writing and work." />
+    <meta name="color-scheme" content="light dark" />
+
+    <title>Javohirbek Mirzakhalov — Frontend engineer, Tashkent</title>
+    <meta
+      name="description"
+      content="Frontend engineer in Tashkent. Clinic booking systems, storefronts and interfaces for the web — with the work, the decisions behind it, and the writing."
+    />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <script>
+      // Resolve the theme before first paint, so the ground never flashes.
+      // Stored value is 'light' | 'dark' | 'system'; 'system' is the default
+      // and is the only one that follows prefers-color-scheme.
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme') || 'system';
+          var resolved =
+            stored === 'system'
+              ? matchMedia('(prefers-color-scheme: light)').matches
+                ? 'light'
+                : 'dark'
+              : stored;
+          document.documentElement.dataset.theme = resolved;
+          document.documentElement.dataset.themeChoice = stored;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark';
+          document.documentElement.dataset.themeChoice = 'system';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

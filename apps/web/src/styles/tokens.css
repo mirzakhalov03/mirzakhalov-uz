@@ -1,113 +1,84 @@
 /**
- * Every value from the design doc §3, in one file.
- * TypeScript never imports a colour — components reference var(--violet).
+ * Raw palette and scale. Design doc §3.
  *
- * The three surfaces are a token swap, not three stylesheets:
- *   :root                    → void ground (default)
- *   [data-surface="plate"]   → raised panel
- *   [data-surface="bone"]    → reading surface, and print
+ * Nothing here changes between themes — these are the pigments. Which pigment
+ * plays which role is decided in theme.css. Hard rule from §8.8: no hex value
+ * exists anywhere in the codebase except this file.
  */
 
-:root {
-  /* --- colour: void ground --- */
-  --void: #0c0a14;
-  --plate: #141126;
-  --plate-2: #1b1733;
+@theme {
+  /* --- the 8px construction module ---------------------------------------
+   * Redefining Tailwind's spacing multiplier means the whole numeric scale is
+   * the design's own ladder: p-1 = 8, p-2 = 16, p-3 = 24, p-4 = 32 (the
+   * module), p-6 = 48, p-8 = 64, p-12 = 96, p-16 = 128. Utilities and the
+   * construction grid agree by construction, not by convention. */
+  --spacing: 8px;
 
-  --bone: #ede7da;
-  --bone-60: #9a9488;
-  --bone-30: rgba(237, 231, 218, 0.3);
+  /* --- pigments ---------------------------------------------------------- */
+  --color-void: #0c0a14;
+  --color-plate: #141126;
+  --color-plate-2: #1b1733;
 
-  --violet: #684fff;
-  --violet-hot: #8a73ff;
-  --violet-deep: #4a32d6;
+  --color-bone: #ede7da;
+  --color-bone-raised: #f6f2e9;
+  --color-bone-well: #e3dbca;
 
-  --brass: #e0b252;
-  --mint: #5bd6a0;
-  --rose: #ff7a7a;
+  --color-violet: #684fff;
+  --color-violet-hot: #8a73ff;
+  --color-violet-deep: #4a32d6;
 
-  --line: rgba(237, 231, 218, 0.16);
-  --grid: rgba(104, 79, 255, 0.09);
-  --grid-major: rgba(104, 79, 255, 0.17);
+  --color-brass: #e0b252;
+  --color-mint: #5bd6a0;
+  --color-mint-deep: #0b6845;
+  --color-rose: #ff7a7a;
+  --color-rose-deep: #b3261e;
 
-  /* semantic aliases — components use these, not the raw names above */
-  --surface: var(--void);
-  --surface-raised: var(--plate);
-  --surface-well: var(--plate-2);
-  --text: var(--bone);
-  --text-muted: var(--bone-60);
-  --text-disabled: var(--bone-30);
-  --link: var(--violet-hot);
-
-  /* --- spacing: 8px base, 32px module, 256px major --- */
-  --u: 8px;
-  --s2: 16px;
-  --s3: 24px;
-  --s4: 32px;
-  --s5: 48px;
-  --s6: 64px;
-  --s7: 96px;
-  --s8: 128px;
-
-  --content-max: 1280px;
-  --measure: 62ch; /* prose capped at 60–64 characters */
-  --gutter: var(--s3);
-  --section-padding: var(--s4);
-
-  /* --- type --- */
-  --font-sans: 'Archivo', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
-  --font-display: 'Days One', var(--font-sans);
+  /* --- type -------------------------------------------------------------- */
+  --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', monospace;
+  --font-display: 'Days One', 'Archivo Variable', sans-serif;
 
   --text-hero: clamp(3.25rem, 10.5vw, 7.25rem);
+  --text-hero--line-height: 0.9;
+  --text-hero--letter-spacing: -0.045em;
+
   --text-h2: clamp(1.75rem, 4.5vw, 2.75rem);
+  --text-h2--line-height: 1.02;
+  --text-h2--letter-spacing: -0.025em;
+
   --text-h3: 1.625rem;
+  --text-h3--line-height: 1.1;
+  --text-h3--letter-spacing: -0.02em;
+
   --text-h4: 1.125rem;
+  --text-h4--line-height: 1.44;
+
   --text-lede: 1.1875rem;
+  --text-lede--line-height: 1.58;
+
   --text-body: 1.0625rem;
+  --text-body--line-height: 1.65;
+
   --text-data: 0.6875rem;
+  --text-data--line-height: 1.45;
+  --text-data--letter-spacing: 0.09em;
+
   --text-data-lg: 0.8125rem;
+  --text-data-lg--line-height: 1.54;
+  --text-data-lg--letter-spacing: 0.06em;
+
   --text-numeral: 2.125rem;
+  --text-numeral--line-height: 0.9;
 
-  /* --- form --- */
-  --radius: 0; /* everywhere. no exceptions. */
-  --border: 1px solid var(--line);
-  --focus-ring: 2px solid var(--violet-hot);
-  --focus-offset: 3px;
+  /* --- structure --------------------------------------------------------- */
+  --radius-*: initial; /* §3.4: radius 0, everywhere, no exceptions. */
 
-  /* --- motion --- */
-  --ease: cubic-bezier(0.2, 0, 0, 1);
-  --duration-fast: 120ms;
-  --duration: 200ms;
-}
+  --container-content: 1280px;
 
-[data-surface='plate'] {
-  --surface: var(--plate);
-  --surface-raised: var(--plate-2);
-}
-
-/* Reading surface, and the print stylesheet. Roles invert; tokens do not change name. */
-[data-surface='bone'] {
-  --surface: var(--bone);
-  --surface-raised: #f6f2e9;
-  --surface-well: #e6dfd0;
-  --text: var(--void);
-  --text-muted: #4a4640;
-  --text-disabled: rgba(12, 10, 20, 0.4);
-  --link: var(--violet-deep);
-  --line: rgba(12, 10, 20, 0.18);
-}
-
-@media (min-width: 640px) {
-  :root {
-    --section-padding: var(--s5);
-    --gutter: var(--s4);
-  }
-}
-
-@media (min-width: 1024px) {
-  :root {
-    --section-padding: var(--s6);
-    --gutter: var(--s5);
-  }
+  /* --- motion ------------------------------------------------------------
+   * Two durations only (§7.4): micro state changes the user caused, and the
+   * two deliberate set-pieces. Anything that wants a third is decoration. */
+  --ease-plate: cubic-bezier(0.2, 0, 0, 1);
+  --duration-micro: 160ms;
+  --duration-deliberate: 900ms;
 }
