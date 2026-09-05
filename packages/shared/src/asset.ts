@@ -36,3 +36,17 @@ export const assetUpdateSchema = z.object({
   alt: z.string().max(300),
 });
 export type AssetUpdateInput = z.infer<typeof assetUpdateSchema>;
+
+/** Admin media library listing. */
+export const assetListSchema = z.object({
+  items: z.array(assetSchema),
+  nextCursor: z.string().nullable(),
+});
+export type AssetList = z.infer<typeof assetListSchema>;
+
+export const assetQuery = z.object({
+  kind: assetKind.optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(24),
+  cursor: z.string().optional(),
+});
+export type AssetQuery = z.infer<typeof assetQuery>;
