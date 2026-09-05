@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { objectId } from './common.js';
+import { listResponse, objectId } from './common.js';
 
 export const assetKind = z.enum(['image', 'pdf', 'other']);
 export type AssetKind = z.infer<typeof assetKind>;
@@ -38,10 +38,7 @@ export const assetUpdateSchema = z.object({
 export type AssetUpdateInput = z.infer<typeof assetUpdateSchema>;
 
 /** Admin media library listing. */
-export const assetListSchema = z.object({
-  items: z.array(assetSchema),
-  nextCursor: z.string().nullable(),
-});
+export const assetListSchema = listResponse(assetSchema);
 export type AssetList = z.infer<typeof assetListSchema>;
 
 export const assetQuery = z.object({

@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   adminPostSchema,
+  assetListSchema,
   postDetailSchema,
   postListSchema,
   postQuery,
@@ -87,6 +88,11 @@ describe('post wire schemas', () => {
 
   it('parses a tag count', () => {
     expect(() => tagCountSchema.parse({ tag: 'craft', count: 3 })).not.toThrow();
+  });
+
+  it('shapes the asset list envelope as { items, nextCursor }', () => {
+    expect(() => assetListSchema.parse({ items: [asset], nextCursor: null })).not.toThrow();
+    expect(() => assetListSchema.parse({ items: [asset] })).toThrow();
   });
 
   it('has no status field on the public query, so drafts cannot be requested', () => {
