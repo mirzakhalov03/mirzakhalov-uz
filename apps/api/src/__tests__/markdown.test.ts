@@ -31,7 +31,7 @@ describe('renderMarkdown', () => {
     expect(html).toContain('&lt;img');
   });
 
-  it('neutralises a javascript: URL in markdown link syntax before it can become a live href', () => {
+  it("rejects a javascript: URL via markdown-it's own validateLink, before it can become a live href", () => {
     const { html } = renderMarkdown('[click](javascript:alert(1))');
     expect(html).not.toMatch(/href=["']javascript:/i);
   });

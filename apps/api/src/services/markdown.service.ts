@@ -9,12 +9,16 @@ import type { TocEntry } from '@portfolio/shared';
  * configuration ever loosens, only posts saved afterwards are affected — and
  * the stored HTML can be diffed to find them.
  *
- * `html: false` means raw HTML in the source is escaped, never parsed — it
- * never becomes a live element, so there is nothing for an event handler or a
- * `javascript:` href to attach to. DOMPurify is not a second pass over that
- * same text; it guards a different surface — elements markdown itself
- * *generates* (links, images) and any future loosening of this config. Both
- * layers are required by Technical PRD §5.2.
+ * `html: false` neutralises raw HTML in the source — it never becomes a live
+ * element, so an event handler has nothing to attach to. markdown-it's own
+ * `validateLink` separately rejects dangerous schemes (`javascript:`,
+ * `vbscript:`, `data:`, …) in markdown link syntax before a `<a>` is ever
+ * emitted. Between the two, DOMPurify is not reached by any input today —
+ * verified empirically, not assumed. It stays anyway as defence-in-depth
+ * against config drift: a future `html: true`, or a plugin (footnotes,
+ * tables, attrs) that emits markup the two guards above don't cover. That is
+ * the scenario where it earns its keep. Technical PRD §5.2 requires
+ * sanitising regardless.
  */
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true });
 
@@ -89,9 +93,7 @@ export function renderMarkdown(source: string): RenderedMarkdown {
     toc.push({ id, text, depth });
   }
 
-  const html = purify.sanitize(md.renderer.render(tokens, md.options, env), {
-    ADD_ATTR: ['target', 'id', 'class'],
-  });
+  const html = purify.sanitize(md.renderer.render(tokens, md.options, env));
 
   return {
     html,
