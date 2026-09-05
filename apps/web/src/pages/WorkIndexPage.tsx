@@ -34,7 +34,7 @@ export function WorkIndexPage() {
       <Section
         id="index"
         title="Everything"
-        lede="Fourteen projects, newest first. Client work, things that run in production, and the early exercises that got there."
+        lede="Seventeen projects, newest first. Client work, things that run in production, and the early exercises that got there."
         aside={<Data>{visible.length} shown</Data>}
       >
         <div role="group" aria-label="Filter projects" className="flex flex-wrap gap-1.5">

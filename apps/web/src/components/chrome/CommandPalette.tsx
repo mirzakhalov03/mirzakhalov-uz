@@ -8,9 +8,10 @@ type Command = { id: string; label: string; group: string; to?: string; href?: s
 const COMMANDS: Command[] = [
   { id: 'home', label: 'Home', group: 'Go', to: '/' },
   { id: 'work-index', label: 'All work', group: 'Go', to: '/work' },
-  { id: 'sec-work', label: 'Selected work', group: 'Section', to: '/#work' },
   { id: 'sec-about', label: 'About', group: 'Section', to: '/#about' },
-  { id: 'sec-writing', label: 'Writing', group: 'Section', to: '/#writing' },
+  { id: 'sec-projects', label: 'Projects', group: 'Section', to: '/#projects' },
+  { id: 'sec-media', label: 'Media', group: 'Section', to: '/#media' },
+  { id: 'sec-blog', label: 'Blog', group: 'Section', to: '/#blog' },
   { id: 'sec-contact', label: 'Contact', group: 'Section', to: '/#contact' },
   ...socials.map((s) => ({ id: `social-${s.label}`, label: s.label, group: 'Elsewhere', href: s.url })),
 ];

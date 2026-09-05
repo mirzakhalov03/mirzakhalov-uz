@@ -11,6 +11,10 @@ type SectionProps = {
   lede?: string;
   /** Right-hand furniture on the title rule: a count, a link, a legend. */
   aside?: ReactNode;
+  /** Turn this section's ground over. `void` paints a full-bleed dark band
+   *  behind it and re-points every semantic token for the subtree, so the
+   *  content inside needs no changes at all. Omit to sit on the sheet. */
+  surface?: 'bone' | 'void';
   children: ReactNode;
 };
 
@@ -19,9 +23,22 @@ type SectionProps = {
  * its section is in view — the drawing-margin equivalent of a scroll position
  * indicator, and the reason the design doesn't need a progress dot column.
  */
-export function Section({ id, index, title, lede, aside, children }: SectionProps) {
+export function Section({ id, index, title, lede, aside, surface, children }: SectionProps) {
+  const band = surface === 'void';
+
   return (
-    <section id={id} data-section={id} className="scroll-mt-11 border-t border-line py-8 lg:py-12">
+    <section
+      id={id}
+      data-section={id}
+      data-surface={surface}
+      className={[
+        'scroll-mt-11',
+        /* A band is separated by the change of ground, so it does not also take
+           the hairline — two separation devices for one edge (§3.4). It gets
+           more air instead, because an inverted block needs room to be a block. */
+        band ? 'band py-10 lg:py-16' : 'border-t border-line py-8 lg:py-12',
+      ].join(' ')}
+    >
       <div className="lg:grid lg:grid-cols-[88px_1fr] lg:gap-6">
         <div className="lg:sticky lg:top-11 lg:self-start lg:pt-1">
           {index ? (

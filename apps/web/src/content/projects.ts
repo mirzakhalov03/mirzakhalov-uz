@@ -8,6 +8,69 @@ import type { Project } from './types.js';
  * Uzbek text uses U+02BB (ʻ) for oʻ and gʻ, not a straight apostrophe (§3.1).
  */
 export const projects: Project[] = [
+  /* 2026. The three that moved the work past "React developer who builds
+     sites": a platform with a queue and a model behind it, an agent that runs
+     as a daemon, and an API someone else also committed to. Each summary says
+     the one hard thing the project actually solved, because that is the part a
+     reviewer cannot get from the screenshot. */
+  {
+    slug: 'quizflow',
+    title: 'QuizFlow',
+    year: 2026,
+    summary: {
+      en: 'Upload a PDF, a Notion page or your own notes and it returns a quiz — multiple choice, multi-select, true/false, or open-ended answers graded by a model. Generation runs on Lambda behind a job record the client polls, so a fifty-page upload never holds a request open. Built with five other engineers.',
+      uz: 'PDF, Notion sahifasi yoki oʻz konspektingizni yuklaysiz — u test tuzib beradi. Ochiq savollarga berilgan javoblarni model baholaydi. Test tuzish Lambdada, navbat orqali ishlaydi.',
+    },
+    stack: ['React 19', 'TypeScript', 'Express', 'Postgres', 'AWS Lambda'],
+    tags: ['live'],
+    links: {
+      demo: 'https://quizflow.uz',
+      source: 'https://github.com/mirzakhalov03/QuizFlow-frontend',
+    },
+    cover: {
+      url: '/work/quizflow.jpg',
+      alt: 'QuizFlow landing page — “Turn study materials into interactive quizzes instantly” beside a quiz preview panel',
+    },
+    featured: true,
+    hasCaseStudy: false,
+  },
+  {
+    slug: 'nemo-ai',
+    title: 'NemoAI',
+    year: 2026,
+    summary: {
+      en: 'A Telegram assistant that persists: file-backed memory it reads and writes itself, cron reminders, vision on photos and PDFs, and read-only SQL over its own history — twenty-nine tools in one long-running Node daemon on the Claude Agent SDK. A TypeScript rebuild of a Python bot by Rustam Zokirov.',
+      uz: 'Telegramdagi doimiy yordamchi: oʻzi oʻqib-yozadigan xotira fayllari, eslatmalar, suratlar va PDF bilan ishlash. Claude Agent SDK ustida qurilgan Node daemoni.',
+    },
+    stack: ['TypeScript', 'Node.js', 'Claude Agent SDK', 'SQLite', 'Docker'],
+    tags: ['live'],
+    /* Private repository and no web surface to link — it lives in Telegram.
+       The plate renders as a non-interactive article, which is correct: there
+       is nothing honest to open. */
+    links: {},
+    cover: null,
+    featured: true,
+    hasCaseStudy: false,
+  },
+  {
+    slug: 'shorten-uz',
+    title: 'shorten.uz',
+    year: 2026,
+    summary: {
+      en: 'A URL shortener written with one other engineer. Eight-character nanoid codes that retry on a unique-constraint collision rather than trusting the odds, JWT sessions with refresh tokens in their own table, and a Drizzle-migrated Postgres schema behind an Express API.',
+      uz: 'Havolalarni qisqartirish xizmati, ikki kishilik jamoada yozilgan. Sakkiz belgili kod, JWT sessiyalar va Postgres asosidagi Express API.',
+    },
+    stack: ['React', 'TypeScript', 'Express', 'Drizzle', 'Postgres'],
+    tags: ['live'],
+    links: { demo: 'https://shorten.uz', source: 'https://github.com/mirzakhalov03/shorten-uz' },
+    cover: {
+      url: '/work/shorten-uz.jpg',
+      alt: 'shorten.uz home page with the paste-a-URL field and the Shorten button',
+    },
+    featured: true,
+    hasCaseStudy: false,
+  },
+
   {
     slug: 'rgm-clinic',
     title: 'RGM Clinic',
@@ -53,7 +116,7 @@ export const projects: Project[] = [
       source: 'https://github.com/mirzakhalov03/E-COMMERCE',
     },
     cover: { url: '/work/e-commerce.jpg', alt: 'E-Commerce catalogue page with the language switcher open' },
-    featured: true,
+    featured: false,
     hasCaseStudy: false,
   },
   {

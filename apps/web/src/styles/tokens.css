@@ -37,10 +37,24 @@
   --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', monospace;
   --font-display: 'Days One', 'Archivo Variable', sans-serif;
+  /* The drafted hand. Cabin Sketch is a geometric sans redrawn by pen —
+     double-line outlines with hatched fill, upright, no slant. Used for the
+     name and nothing else (§3.1: one display family per job). */
+  --font-sketch: 'Cabin Sketch', 'Archivo Variable', sans-serif;
 
-  --text-hero: clamp(3.25rem, 10.5vw, 7.25rem);
+  --text-hero: clamp(2.75rem, 8.5vw, 6.25rem);
   --text-hero--line-height: 0.9;
   --text-hero--letter-spacing: -0.045em;
+
+  /* Sized against its own column, not the viewport. The signature line carries
+     "JAVOHIRBEK" alone, which measures 5.46em in Cabin Sketch, so 18.3cqw fills
+     the column exactly and 17cqw leaves slack. A vw figure cannot do this: the
+     hero column is full-bleed on phones but 1.15fr of a two-column grid from lg
+     up, so any single viewport ratio overflows at one end or shrinks at the
+     other. The 6.5rem ceiling is set so the drawn caps land near the cap height
+     of --text-hero beneath them — Cabin Sketch's caps are 0.652em against
+     Archivo's ~0.73, so it has to run larger to look the same size. */
+  --text-signature: clamp(2.25rem, 17cqw, 6.5rem);
 
   --text-h2: clamp(1.75rem, 4.5vw, 2.75rem);
   --text-h2--line-height: 1.02;
@@ -74,6 +88,11 @@
   --radius-*: initial; /* §3.4: radius 0, everywhere, no exceptions. */
 
   --container-content: 1280px;
+
+  /* The sticky top bar: 56px of box plus its hairline. Structural rather than
+     decorative — the first panel in a stack has to subtract it to fill the
+     screen the reader can actually see. */
+  --bar-h: 57px;
 
   /* --- motion ------------------------------------------------------------
    * Two durations only (§7.4): micro state changes the user caused, and the

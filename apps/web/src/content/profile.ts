@@ -3,7 +3,7 @@ import type { Language, Note, Score, Social, StackItem } from './types.js';
 export const profile = {
   name: 'Javohirbek Mirzakhalov',
   surname: 'Mirzakhalov',
-  role: 'Frontend engineer',
+  role: 'Software Engineer',
   location: 'Tashkent',
   coords: { lat: 41.2995, lng: 69.2401 },
   timezone: 'Asia/Tashkent',
@@ -21,6 +21,10 @@ export const profile = {
       'I am studying at INHA University in Tashkent, with a 1330 SAT, a band 8.0 IELTS, and scholarship offers from seven American universities behind me.',
     ],
   },
+
+  /* The line at the foot of every page. Two years of teaching and a clinic
+     booking system say the same thing, so the footer says it once. */
+  motto: 'Clarity is most of the job — in a classroom or in a codebase.',
 
   now: {
     text: 'Rebuilding this site in the open — React 19, a design system drawn from scratch, and an Express API so that publishing a project stops being a commit.',

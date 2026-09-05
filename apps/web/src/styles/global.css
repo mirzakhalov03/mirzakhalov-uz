@@ -10,6 +10,30 @@
 
 @source '../';
 
+/* Cabin Sketch 700, subset to A–Z and a little punctuation. The full latin cut
+   is 132 kB — every glyph is a drawn double outline plus hatch strokes, so it
+   costs an order of magnitude more path data than a normal face — and it is
+   used by exactly one element, above the fold. Subsetting takes it to 39 kB.
+
+   Regenerate after `npm i -D @fontsource/cabin-sketch` with:
+     pyftsubset node_modules/@fontsource/cabin-sketch/files/\
+       cabin-sketch-latin-700-normal.woff2 --flavor=woff2 --layout-features='*' \
+       --text="ABCDEFGHIJKLMNOPQRSTUVWXYZ -–—.,'&" \
+       --output-file=apps/web/public/fonts/cabin-sketch-700-caps.woff2
+
+   Uppercase only, which is safe because .t-signature sets text-transform:
+   uppercase — but it does mean lowercase in this face falls back to Archivo. */
+@font-face {
+  font-family: 'Cabin Sketch';
+  font-style: normal;
+  font-weight: 700;
+  /* Preloaded in index.html, so swap almost never fires visibly. It stays
+     `swap` rather than `block` because the fallback is a condensed grotesque of
+     a completely different width — a flash of the wrong name beats no name. */
+  font-display: swap;
+  src: url('/fonts/cabin-sketch-700-caps.woff2') format('woff2');
+}
+
 @layer base {
   * {
     margin: 0;
@@ -19,6 +43,11 @@
     -webkit-text-size-adjust: 100%;
     /* The sticky bar is 56px; anchors clear it plus one module. */
     scroll-padding-top: 88px;
+    /* Inverted bands are one viewport wide, which overshoots by the scrollbar's
+       width on platforms that reserve one. `clip` swallows the overshoot;
+       `hidden` would make the viewport a scroll container and break every
+       position: sticky on the page — the top bar and the section indices. */
+    overflow-x: clip;
   }
 
   body {

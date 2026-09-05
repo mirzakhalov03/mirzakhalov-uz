@@ -1,58 +1,25 @@
 /**
- * Two independent axes, one set of semantic names.
+ * One sheet, two grounds.
  *
- *   [data-theme]    what the page ground is        — light | dark
- *   [data-surface]  what THIS element is           — void | bone | plate
+ * There is no page-level theme and no toggle. The sheet is bone; a section that
+ * wants the opposite ground declares it on itself:
  *
- * The point of separating them: a bone plate is warm paper whatever the theme,
- * and a void plate is a hard dark block whatever the theme. So dark mode gets
- * light reading islands (design doc principle 7) and light mode gets the same
- * strong-contrast composition inverted — one mechanism, both directions.
+ *   [data-surface]  what THIS element's ground is  — bone | void | plate
  *
- * Because custom properties inherit from the nearest ancestor that sets them,
- * a [data-surface] on a descendant simply wins for its own subtree. No
- * specificity juggling, no !important, no second stylesheet.
+ * Because custom properties inherit from the nearest ancestor that sets them, a
+ * [data-surface] on a section simply wins for its own subtree — every child that
+ * reads --fg, --line or --accent-text re-points itself, and no component has to
+ * know which ground it landed on. No specificity juggling, no !important, no
+ * second stylesheet. It composes both ways too: a bone plate inside a void band
+ * is a warm reading island (design doc principle 7), and it costs one attribute.
  */
 
-/* --- the void value set ---------------------------------------------------
- * Contrast on #0c0a14: bone 15.9:1 · bone-60 6.5:1 · violet-hot 5.6:1
- * · brass 10.0:1 · mint 10.8:1 · rose 7.8:1. Computed, not estimated. */
-:root,
-[data-theme='dark'],
-[data-surface='void'] {
-  color-scheme: dark;
-
-  --surface: var(--color-void);
-  --surface-raised: var(--color-plate);
-  --surface-well: var(--color-plate-2);
-
-  --fg: var(--color-bone);
-  --fg-muted: #9a9488;
-  --fg-subtle: rgb(237 231 218 / 0.3);
-
-  --line: rgb(237 231 218 / 0.16);
-  --line-strong: rgb(237 231 218 / 0.34);
-
-  --accent: var(--color-violet);
-  --accent-text: var(--color-violet-hot);
-  --measured: var(--color-brass);
-  --measured-rule: var(--color-brass);
-  --live: var(--color-mint);
-  --danger: var(--color-rose);
-
-  --grid: rgb(104 79 255 / 0.09);
-  --grid-major: rgb(104 79 255 / 0.17);
-  --mark: var(--color-violet);
-
-  --shade: rgb(0 0 0 / 0.6);
-}
-
-/* --- the bone value set ---------------------------------------------------
+/* --- the bone value set — the sheet ---------------------------------------
  * Contrast on #ede7da: void 15.9:1 · violet-deep 6.3:1 · mint-deep 5.5:1
  * · rose-deep 5.3:1. Brass is a rule or mark only here — the obvious deep
  * brass lands at 4.35:1, just under AA, so rather than invent a fourth brass
  * the measured numeral goes to void and the dimension bar stays brass (§3.2). */
-[data-theme='light'],
+:root,
 [data-surface='bone'] {
   color-scheme: light;
 
@@ -81,7 +48,52 @@
   --shade: rgb(12 10 20 / 0.42);
 }
 
-/* A raised panel keeps its theme's palette and only steps the fill up one. */
+/* --- the void value set — the inverted band -------------------------------
+ * Contrast on #0c0a14: bone 15.9:1 · bone-60 6.5:1 · violet-hot 5.6:1
+ * · brass 10.0:1 · mint 10.8:1 · rose 7.8:1. Computed, not estimated. */
+[data-surface='void'] {
+  color-scheme: dark;
+
+  --surface: var(--color-void);
+  --surface-raised: var(--color-plate);
+  --surface-well: var(--color-plate-2);
+
+  --fg: var(--color-bone);
+  --fg-muted: #9a9488;
+  --fg-subtle: rgb(237 231 218 / 0.3);
+
+  --line: rgb(237 231 218 / 0.16);
+  --line-strong: rgb(237 231 218 / 0.34);
+
+  --accent: var(--color-violet);
+  --accent-text: var(--color-violet-hot);
+  --measured: var(--color-brass);
+  --measured-rule: var(--color-brass);
+  --live: var(--color-mint);
+  --danger: var(--color-rose);
+
+  --grid: rgb(104 79 255 / 0.09);
+  --grid-major: rgb(104 79 255 / 0.17);
+  --mark: var(--color-violet);
+
+  --shade: rgb(0 0 0 / 0.6);
+}
+
+/**
+ * The one value that does not flip with the ground, and the only elevation in
+ * the system (§3.4 forbids the rest).
+ *
+ * It cannot flip, because a panel's lift falls on the panel *underneath* it and
+ * CSS has no way to ask what that panel's ground is. So it is a dark cast, set
+ * once: right for the common case of bone landing on bone, and invisible where
+ * a bone panel lands on the void band — which needs no help, being the largest
+ * contrast change on the page.
+ */
+:root {
+  --lift: rgb(12 10 20 / 0.28);
+}
+
+/* A raised panel keeps its ground's palette and only steps the fill up one. */
 [data-surface='plate'] {
   --surface: var(--surface-raised);
   --surface-well: var(--surface-well);
@@ -90,7 +102,7 @@
 /**
  * Expose the semantic layer to Tailwind. `inline` is what makes this work:
  * it emits `var(--surface)` rather than resolving to a literal at build time,
- * so `bg-surface` follows the live value and the theme swap is one attribute.
+ * so `bg-surface` follows the live value and the ground swap is one attribute.
  */
 @theme inline {
   --color-surface: var(--surface);

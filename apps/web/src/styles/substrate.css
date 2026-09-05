@@ -6,26 +6,30 @@
 
 /* ==========================================================================
    The construction grid — 32px module, 256px major (§3.3)
-   A fixed CSS-gradient layer. Never an image, never a canvas: it has to be
-   free to paint, because it is on every page at all times (§7.4).
+   CSS gradients, never an image and never a canvas: it is on every page at all
+   times, so it has to be free to paint (§7.4). Three things wear it — the fixed
+   sheet behind an unstacked page, an inverted band, and every panel in a stack.
+   The last two cover the sheet and so have to carry the grid on across
+   themselves, which is why the paint is declared once, here.
    ========================================================================== */
 
-.substrate {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
+.substrate,
+.band::before,
+.stack > *::before {
   background-color: var(--surface);
   background-image:
     linear-gradient(to right, var(--grid) 1px, transparent 1px),
     linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
   background-size: 32px 32px;
+  /* Centred on x, so the band's 100vw box and the fixed sheet rule up together. */
   background-position: center top;
 }
 
 /* The major rule crowds a phone screen, so below 640px the module stands alone. */
 @media (min-width: 640px) {
-  .substrate {
+  .substrate,
+  .band::before,
+  .stack > *::before {
     background-image:
       linear-gradient(to right, var(--grid) 1px, transparent 1px),
       linear-gradient(to bottom, var(--grid) 1px, transparent 1px),
@@ -37,6 +41,13 @@
       256px 256px,
       256px 256px;
   }
+}
+
+.substrate {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* The drawing surface lags behind the content resting on it. Scroll-linked,
@@ -55,6 +66,114 @@
   to {
     transform: translate3d(0, 96px, 0);
   }
+}
+
+/* ==========================================================================
+   Grounds — a section that owns the surface under it (§3.2)
+   Two things want one: an inverted band, which turns a section's ground over
+   without turning the page over, and every panel in a stack, which has to be
+   opaque or the panel it covers shows through. Both have to bleed to the
+   viewport edges — a block that stopped at the 1280px container would read as
+   a card rather than as ground — so the fill escapes the container from inside
+   it, and both get their own stacking context so the z-index:-1 fill sits
+   under their content but still above whatever they cover.
+   ========================================================================== */
+
+.band,
+.stack > * {
+  isolation: isolate;
+}
+
+.band {
+  position: relative;
+}
+
+.band::before,
+.stack > *::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset-block: 0;
+  /* One viewport wide, centred on the section. html carries overflow-x: clip,
+     so where 100vw overshoots by the scrollbar's width it is swallowed instead
+     of scrolled. `translate` rather than `transform`, which the sheet animates. */
+  left: 50%;
+  width: 100vw;
+  translate: -50% 0;
+}
+
+/* ==========================================================================
+   The stack (§4.2)
+   Each section is a sheet in its own right, and the next one lands on top of
+   the last. Every panel is sticky, so it holds where it stops; sticky boxes
+   stay in flow, so later siblings paint over earlier ones in document order
+   and the sheet you are reading is simply the last one to have arrived.
+   Scrolling back up peels them off in reverse for nothing.
+
+   Note what is absent: no scroll listener, no observer driving position, and
+   no animation. Content still does not animate because it scrolled into view
+   (§2 principle 4) — the movement here *is* the reader's scroll.
+   ========================================================================== */
+
+.stack > * {
+  position: sticky;
+  /* 0 for a panel that fits the screen. For a taller one useStack writes a
+     negative offset, so it scrolls up until its last line rests on the
+     viewport floor and holds there — pinned at 0 it would hide its own tail. */
+  top: var(--stick-top, 0px);
+  /* Full coverage, so a panel never shows the one beneath it through a gap.
+     lvh, not dvh: dvh re-lays out every panel each time a mobile URL bar
+     slides, and lvh is never shorter than what is actually on screen. */
+  min-height: 100vh;
+  min-height: 100lvh;
+  /* Centres the content of a panel shorter than the screen, and is a no-op on
+     one that is taller. Works on block, flex and grid alike, so this rule does
+     not have to know what kind of box each panel is. */
+  align-content: center;
+  /* A panel's edge bleeds with its ground, so the section's own hairline —
+     which stops at the 1280px container — would read as a rule that ran out.
+     The ground draws the card's edge instead, below. This is unlayered CSS
+     overriding a Tailwind utility in @layer utilities, which is what layers
+     are for. */
+  border-top: 0;
+}
+
+/* Every panel but the first is sticky at top: 0 and so covers the whole screen,
+   bar included — the bar simply paints over it. The first one is different: it
+   begins in the flow *below* the bar, so a full 100lvh runs a bar's height past
+   the bottom of the screen and its centred content lands exactly that much low.
+   It is the one panel whose screen is short by the bar. */
+.stack > :first-child {
+  min-height: calc(100vh - var(--bar-h));
+  min-height: calc(100lvh - var(--bar-h));
+}
+
+/* The card's edge. Bone lands on bone as often as not, so the seam cannot be
+   left to the change of ground the way an inverted band can. */
+.stack > *::before {
+  border-top: 1px solid var(--line);
+}
+
+/* The lift — the one elevation in the system, and the one place §3.4's ban on
+   shadow does not apply: this panel is physically on top of the last one, so
+   the shadow is describing that rather than inventing depth for a flat card.
+
+   Cast from a strip sitting entirely above the panel's own top edge, rather
+   than from a box-shadow on the ground. The ground is a viewport-wide box the
+   height of a whole panel, and blurring one of those on every scroll frame is
+   real work; a 32px gradient is a fill. The interpolation hint puts most of the
+   falloff in the first third, which is how a contact shadow actually reads. */
+.stack > *::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  bottom: 100%;
+  left: 50%;
+  width: 100vw;
+  height: 32px;
+  translate: -50% 0;
+  pointer-events: none;
+  background-image: linear-gradient(to top, var(--lift), 32%, transparent);
 }
 
 /* ==========================================================================
@@ -135,6 +254,28 @@
   line-height: 0.9;
   letter-spacing: -0.045em;
   font-variation-settings: 'wght' 800, 'wdth' 74;
+}
+
+/* The given name only. The surname stays on .t-hero, so the two lines are a
+   drawn hand against a machined one — the contrast is the point, and it is why
+   the sketch face never appears anywhere else on the site.
+
+   line-height 1 rather than the hero's 0.9: the ink of a Cabin Sketch line runs
+   from 0.21em to 1.04em of its box (the J drops below the baseline), so at 0.9
+   it would collide with the caps of the surname underneath. */
+.t-signature {
+  display: block;
+  font-family: var(--font-sketch);
+  font-size: var(--text-signature);
+  font-weight: 700; /* 400 is outline-only; the hatched fill lives in 700. */
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* The measuring stick for --text-signature's cqw. Declared on the wrapper
+   rather than the heading, because an element cannot query its own size. */
+.signature-column {
+  container-type: inline-size;
 }
 
 .t-h2 {
@@ -352,5 +493,281 @@
 @media (prefers-reduced-motion: reduce) {
   .screenshot {
     filter: none;
+  }
+}
+
+/* ==========================================================================
+   The stack comb (§3.5)
+   The tools drawn as a honeycomb: one pointy-top hexagon per tool, tessellated
+   on a three-quarter row pitch with alternate rows offset by half a cell.
+
+   Constructed rather than eyeballed (§2 principle 1). A pointy-top hexagon's
+   height is its width × 2/√3, so `--comb-height` is the cell width × 1.1547 and
+   the clip path's facets land on the true 25/75 vertices. Rows overlap by a
+   quarter of that height — the hexagon's own tiling — which is why the row pitch
+   is 0.75 of the height rather than all of it, and why the list needs a quarter
+   height of bottom padding to make room for the last row's point.
+   ========================================================================== */
+
+.comb {
+  --comb-cell: 96px;
+  --comb-gap: 6px;
+  --comb-step: calc(var(--comb-cell) + var(--comb-gap));
+  --comb-height: calc(var(--comb-cell) * 1.1547);
+  --comb-row: calc(var(--comb-height) * 0.75 + var(--comb-gap));
+
+  display: grid;
+  grid-template-columns: repeat(2, var(--comb-cell));
+  grid-auto-rows: var(--comb-row);
+  justify-content: center;
+  /* Half a cell of side room for the offset rows, and the last row's point. */
+  padding-inline: calc(var(--comb-step) / 4);
+  padding-bottom: calc(var(--comb-height) * 0.25 - var(--comb-gap));
+}
+
+.comb__cell {
+  position: relative;
+  display: grid;
+  width: var(--comb-cell);
+  height: var(--comb-height);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  place-content: center;
+  justify-items: center;
+  gap: calc(var(--comb-cell) * 0.06);
+  /* The cell narrows towards its points, so the text has to keep clear of the
+     facets: a percentage inset tracks the cell as the breakpoints resize it. */
+  padding-inline: 11%;
+  text-align: center;
+  background-color: var(--color-bone-raised);
+  color: var(--color-void);
+  transition:
+    background-color var(--duration-micro) var(--ease-plate),
+    color var(--duration-micro) var(--ease-plate);
+}
+
+/* Daily use, marked on the cell's base facet — the one place on a hexagon where
+   a straight rule reads as part of the shape rather than a border stuck to it. */
+.comb__cell[data-frequency='daily']::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  inset-inline: 0;
+  height: 13%;
+  background-color: var(--color-violet);
+}
+
+.comb__cell:hover {
+  background-color: var(--color-violet);
+  color: var(--color-bone);
+}
+
+.comb__glyph {
+  width: calc(var(--comb-cell) * 0.27);
+  height: calc(var(--comb-cell) * 0.27);
+}
+
+/* A tool with no mark yet still gets a cell, not a hole. */
+.comb__initial {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: calc(var(--comb-cell) * 0.2);
+  line-height: 1;
+}
+
+/* The name stays in the cell at every size, so it is sized from the cell rather
+   than from the type scale — a fixed size would break out of the hexagon. */
+.comb__name {
+  font-family: var(--font-mono);
+  font-size: calc(var(--comb-cell) * 0.088);
+  font-variation-settings: 'wght' 600;
+  letter-spacing: 0.05em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  hyphens: none;
+}
+
+/* The legend's swatch: the base facet on its own, as a triangle. */
+.comb-key {
+  display: inline-block;
+  width: 9px;
+  height: 8px;
+  vertical-align: -1px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background-color: var(--color-violet);
+}
+
+/* The offset. Every cell shifts a quarter step left; every second *row* shifts
+   a quarter step right, which puts its cells in the notches of the row above.
+   Row parity in a grid of N columns is a 2N cycle, so each breakpoint restates
+   the pair as the column count changes. */
+.comb > :nth-child(n) {
+  translate: calc(var(--comb-step) / -4);
+}
+
+.comb > :nth-child(4n + 3),
+.comb > :nth-child(4n + 4) {
+  translate: calc(var(--comb-step) / 4);
+}
+
+@media (min-width: 400px) {
+  .comb {
+    --comb-cell: 100px;
+    grid-template-columns: repeat(3, var(--comb-cell));
+  }
+
+  .comb > :nth-child(n) {
+    translate: calc(var(--comb-step) / -4);
+  }
+
+  .comb > :nth-child(6n + 4),
+  .comb > :nth-child(6n + 5),
+  .comb > :nth-child(6n + 6) {
+    translate: calc(var(--comb-step) / 4);
+  }
+}
+
+@media (min-width: 640px) {
+  .comb {
+    --comb-cell: 112px;
+    grid-template-columns: repeat(4, var(--comb-cell));
+  }
+
+  .comb > :nth-child(n) {
+    translate: calc(var(--comb-step) / -4);
+  }
+
+  .comb > :nth-child(8n + 5),
+  .comb > :nth-child(8n + 6),
+  .comb > :nth-child(8n + 7),
+  .comb > :nth-child(8n + 8) {
+    translate: calc(var(--comb-step) / 4);
+  }
+}
+
+@media (min-width: 1024px) {
+  .comb {
+    --comb-cell: 118px;
+    grid-template-columns: repeat(6, var(--comb-cell));
+  }
+
+  .comb > :nth-child(n) {
+    translate: calc(var(--comb-step) / -4);
+  }
+
+  .comb > :nth-child(12n + 7),
+  .comb > :nth-child(12n + 8),
+  .comb > :nth-child(12n + 9),
+  .comb > :nth-child(12n + 10),
+  .comb > :nth-child(12n + 11),
+  .comb > :nth-child(12n + 12) {
+    translate: calc(var(--comb-step) / 4);
+  }
+}
+
+@media (min-width: 1280px) {
+  .comb {
+    --comb-cell: 136px;
+  }
+}
+
+/* ==========================================================================
+   The portrait (§4.6)
+   A round photograph inside a ring that is a single sweep of accent rather than
+   a stroke: a conic-feeling gradient masked down to an annulus, so the ring has
+   a light source instead of a uniform border colour.
+
+   The ring is a masked box, not a `border`. A border can only be one flat
+   colour per edge, and the gradient has to run continuously around the circle.
+   `radial-gradient(closest-side, transparent …, black …)` punches the middle
+   out at exactly the ring's thickness, leaving the gradient visible only in the
+   annulus — which also keeps the ring out of the photo's own box, so the two
+   can rotate independently.
+   ========================================================================== */
+
+.portrait {
+  --portrait-ring: 5px;
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.portrait__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(214deg, var(--accent) 50%, var(--surface-raised) 62%);
+  mask: radial-gradient(
+    closest-side,
+    transparent calc(100% - var(--portrait-ring)),
+    black calc(100% - var(--portrait-ring))
+  );
+}
+
+/* Inset from the ring by its own thickness and then some, so the two never
+   touch — a photograph flush against the ring reads as a crop, not a frame. */
+.portrait__photo {
+  position: relative;
+  z-index: 1;
+  width: 94%;
+  height: 94%;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+
+/* The one continuous animation in the system, and the exception that proves
+   §2 principle 4: it is not reacting to a scroll or a hover, it is the sitter's
+   own light turning. Seven seconds is slow enough to read as ambient. */
+@media (prefers-reduced-motion: no-preference) {
+  .portrait__ring {
+    animation: portrait-turn 7s linear infinite;
+  }
+}
+
+@keyframes portrait-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   The hand in the top-bar CTA
+   ========================================================================== */
+
+/* Origin at the wrist, where the drawing's palm meets the arm, so the pivot
+   looks anatomical rather than like a spinning sticker. */
+.hand-wave {
+  transform-origin: 46% 88%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Always waving, but not constantly: three swings, then two seconds of rest.
+     A hand that never stops moving turns the only filled element in the bar
+     into a flicker the eye has to fight (§7.4) — the pause is what keeps it a
+     greeting instead of a distraction. */
+  .hand-wave {
+    animation: hand-wave 3s ease-in-out infinite;
+  }
+}
+
+@keyframes hand-wave {
+  0%,
+  34%,
+  100% {
+    transform: rotate(0deg);
+  }
+  8% {
+    transform: rotate(16deg);
+  }
+  17% {
+    transform: rotate(-11deg);
+  }
+  26% {
+    transform: rotate(13deg);
   }
 }
