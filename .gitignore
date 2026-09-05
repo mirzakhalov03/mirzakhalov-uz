@@ -18,3 +18,7 @@ npm-debug.log*
 !.vscode/extensions.json
 .idea/
 coverage/
+
+# agent scratch: SDD ledgers/briefs/review packages, and worktrees
+.superpowers/
+.worktrees/
