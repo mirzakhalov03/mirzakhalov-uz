@@ -22,6 +22,15 @@ export interface IPost extends Document {
   updatedAt: Date;
 }
 
+const tocEntrySubSchema = new Schema<TocEntry>(
+  {
+    id: { type: String, required: true },
+    text: { type: String, required: true },
+    depth: { type: Number, required: true, min: 2, max: 4 },
+  },
+  { _id: false },
+);
+
 const postSchema = new Schema<IPost>(
   {
     slug: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 80 },
@@ -31,12 +40,8 @@ const postSchema = new Schema<IPost>(
     body: { type: String, required: true, maxlength: 100_000 },
 
     // Derived — see the pre-validate hook below. Never written by a client.
-    // Stored as plain objects (Mixed), not a sub-schema: casting entries into
-    // EmbeddedDocuments would leak Mongoose internals onto a value that is
-    // always renderMarkdown() output, already shape-checked by the shared
-    // Zod TocEntry schema at the API boundary.
     bodyHtml: { type: String, default: '' },
-    toc: { type: Schema.Types.Mixed, default: [] },
+    toc: { type: [tocEntrySubSchema], default: [] },
     readingMinutes: { type: Number, default: 1, min: 1 },
     searchLang: { type: String, enum: ['english', 'none'], default: 'none' },
 

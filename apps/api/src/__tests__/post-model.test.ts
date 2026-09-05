@@ -41,7 +41,7 @@ describe('Post model', () => {
   it('derives bodyHtml, toc and readingMinutes on save', async () => {
     const post = await Post.create(base);
     expect(post.bodyHtml).toContain('id="section"');
-    expect(post.toc).toEqual([{ id: 'section', text: 'Section', depth: 2 }]);
+    expect(post.toObject().toc).toEqual([{ id: 'section', text: 'Section', depth: 2 }]);
     expect(post.readingMinutes).toBe(1);
   });
 
