@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { healthRouter } from './health.routes.js';
 import { authRouter } from './auth.routes.js';
 import { adminAssetRouter } from './admin-asset.routes.js';
+import { postRouter } from './post.routes.js';
 
 /**
  * Everything under /api/v1. Feature routers land here as milestones ship:
@@ -15,3 +16,5 @@ apiRouter.use(healthRouter);
 apiRouter.use(authRouter);
 // M2 (partial) — assets, pulled forward because post covers reference them
 apiRouter.use(adminAssetRouter);
+// M5 — blog, public reads
+apiRouter.use(postRouter);
