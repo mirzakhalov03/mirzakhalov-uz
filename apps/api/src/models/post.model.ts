@@ -2,7 +2,7 @@ import mongoose, { type Document, type Model, Schema, type Types } from 'mongoos
 import { locale, publishStatus, type Locale, type PublishStatus, type TocEntry } from '@portfolio/shared';
 import { renderMarkdown } from '../services/markdown.service.js';
 
-/** Technical PRD §3.3. `bodyHtml`, `toc`, `readingMinutes` and `searchLang` are derived. */
+/** Technical PRD §3.3. `bodyHtml`, `toc` and `readingMinutes` are derived. */
 export interface IPost extends Document {
   _id: Types.ObjectId;
   slug: string;
@@ -13,7 +13,6 @@ export interface IPost extends Document {
   bodyHtml: string;
   toc: TocEntry[];
   readingMinutes: number;
-  searchLang: 'english' | 'none';
   tags: string[];
   cover: Types.ObjectId | null;
   status: PublishStatus;
@@ -43,7 +42,6 @@ const postSchema = new Schema<IPost>(
     bodyHtml: { type: String, default: '' },
     toc: { type: [tocEntrySubSchema], default: [] },
     readingMinutes: { type: Number, default: 1, min: 1 },
-    searchLang: { type: String, enum: ['english', 'none'], default: 'none' },
 
     tags: { type: [String], default: [] },
     cover: { type: Schema.Types.ObjectId, ref: 'Asset', default: null },
@@ -69,12 +67,6 @@ postSchema.pre('validate', function (next) {
     this.readingMinutes = readingMinutes;
   }
 
-  // MongoDB ships no Uzbek stemmer, so Uzbek posts opt out of stemming rather
-  // than being stemmed by English rules (see the text index below).
-  if (this.isNew || this.isModified('lang')) {
-    this.searchLang = this.lang === 'en' ? 'english' : 'none';
-  }
-
   // First publish stamps the date; an explicit value always wins, which is what
   // lets a post be backdated or scheduled. Unpublishing preserves it so
   // re-publishing does not silently jump the post to the top of the feed.
@@ -97,9 +89,20 @@ postSchema.index(
   {
     name: 'post_text',
     weights: { title: 10, excerpt: 5, body: 1 },
-    // Per-document stemming. This cannot be changed later without a full index
-    // rebuild, which is why it is decided up front.
-    language_override: 'searchLang',
+    // Uniform no-stemming, deliberately, on both sides of the index. MongoDB's
+    // $text operator parses the *query* string using the index's
+    // default_language unless the query itself overrides it with $language —
+    // there is no way to vary that per document. So a per-document
+    // language_override (stemming English posts, leaving Uzbek ones alone —
+    // the earlier design here) silently desyncs: documents get indexed
+    // stemmed, queries get parsed unstemmed, and a stemmed word never matches
+    // at read time. Search across a mixed-language corpus with no `lang`
+    // filter (the common case) has no single query language that would serve
+    // both sides correctly anyway. So both sides use `default_language:
+    // 'none'` — literal, unstemmed tokens — which is exact for either
+    // language. MongoDB has no Uzbek stemmer to lose, and the cost on the
+    // English half (e.g. "cats" won't match "cat") is acceptable for a small
+    // bilingual blog whose frontend can also filter client-side.
     default_language: 'none',
   },
 );

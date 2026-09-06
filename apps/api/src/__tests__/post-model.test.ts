@@ -52,11 +52,6 @@ describe('Post model', () => {
     expect(post.toc[0]?.id).toBe('renamed');
   });
 
-  it('sets searchLang from lang so Mongo stems each post correctly', async () => {
-    expect((await Post.create(base)).searchLang).toBe('english');
-    expect((await Post.create({ ...base, slug: 'salom', lang: 'uz' })).searchLang).toBe('none');
-  });
-
   it('stamps publishedAt when a draft is first published', async () => {
     const post = await Post.create({ ...base, status: 'published' });
     expect(post.publishedAt).toBeInstanceOf(Date);
