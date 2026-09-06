@@ -15,5 +15,5 @@ export const postRouter: Router = Router();
 
 postRouter.get('/posts', validate(postQuery, 'query'), asyncHandler(controller.listPosts));
 postRouter.get('/posts/tags', validate(postTagsQuery, 'query'), asyncHandler(controller.listTags));
-// /posts/feed.xml is registered here in Task 10 — also before /posts/:slug.
+postRouter.get('/posts/feed.xml', validate(postTagsQuery, 'query'), asyncHandler(controller.getFeed));
 postRouter.get('/posts/:slug', asyncHandler(controller.getPost));

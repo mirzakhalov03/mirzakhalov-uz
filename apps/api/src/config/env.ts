@@ -19,6 +19,10 @@ const envSchema = z.object({
 
   CORS_ORIGIN: z.string().min(1).default('http://localhost:5173'),
 
+  /** Absolute origin of the public site. The feed links to /writing/:slug there,
+   *  not to the API. */
+  PUBLIC_SITE_URL: z.url().default('http://localhost:5173'),
+
   UPLOAD_DIR: z.string().default('./uploads'),
   PUBLIC_STATIC_PATH: z.string().default('/static'),
 

@@ -239,3 +239,44 @@ describe('GET /posts/:slug', () => {
     expect((await request(app).get('/api/v1/posts/nope')).status).toBe(404);
   });
 });
+
+describe('GET /posts/feed.xml', () => {
+  it('serves Atom XML for published posts only', async () => {
+    await seed();
+    const res = await request(app).get('/api/v1/posts/feed.xml');
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('application/atom+xml');
+    expect(res.text).toContain('<feed xmlns="http://www.w3.org/2005/Atom">');
+    expect(res.text).toContain('<title>Middle</title>');
+    expect(res.text).not.toContain('A draft');
+    expect(res.text).not.toContain('Scheduled');
+  });
+
+  it('links entries at the public site, not the API', async () => {
+    await seed();
+    const res = await request(app).get('/api/v1/posts/feed.xml');
+    expect(res.text).toContain('http://localhost:5173/writing/middle');
+  });
+
+  it('filters by language', async () => {
+    await seed();
+    const res = await request(app).get('/api/v1/posts/feed.xml?lang=uz');
+    expect(res.text).toContain('<title>Newest</title>');
+    expect(res.text).not.toContain('<title>Middle</title>');
+  });
+
+  it('escapes markup in titles rather than emitting invalid XML', async () => {
+    await Post.create({
+      slug: 'sharp', title: 'Types & <angle> brackets', excerpt: 'x', body: 'x',
+      status: 'published', publishedAt: day(1),
+    });
+    const res = await request(app).get('/api/v1/posts/feed.xml');
+    expect(res.text).toContain('Types &amp; &lt;angle&gt; brackets');
+  });
+
+  it('resolves before the :slug route rather than being read as a post slug', async () => {
+    const res = await request(app).get('/api/v1/posts/feed.xml');
+    expect(res.status).toBe(200);
+  });
+});
