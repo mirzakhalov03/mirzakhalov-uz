@@ -7,7 +7,9 @@ import {
   adminPostSchema,
   assetListSchema,
   postDetailSchema,
+  postInputSchema,
   postListSchema,
+  postPatchSchema,
   postQuery,
   postSummarySchema,
   tagCountSchema,
@@ -104,5 +106,30 @@ describe('post wire schemas', () => {
   it('accepts a search term of two characters or more', () => {
     expect(postQuery.parse({ q: 'ab' }).q).toBe('ab');
     expect(() => postQuery.parse({ q: 'a' })).toThrow();
+  });
+
+  it('does not re-inject defaults for fields a PATCH omits', () => {
+    // Regression: postPatchSchema must NOT derive from postInputSchema.partial() —
+    // Zod's .partial() does not suppress .default(), so a naive derivation would
+    // silently fill in lang/tags/cover/status/publishedAt for a caller who only
+    // sent `status`, wiping the post's existing tags, cover and publish date.
+    const parsed = postPatchSchema.parse({ status: 'draft' });
+    expect(Object.keys(parsed)).toEqual(['status']);
+  });
+
+  it('still applies its defaults on the create path', () => {
+    // Guards against over-correcting the fix above: postInputSchema must keep
+    // defaulting a minimal create payload into a complete draft post.
+    const parsed = postInputSchema.parse({
+      slug: 'on-writing',
+      title: 'On writing',
+      excerpt: 'A short note.',
+      body: '# raw',
+    });
+    expect(parsed.lang).toBe('en');
+    expect(parsed.tags).toEqual([]);
+    expect(parsed.status).toBe('draft');
+    expect(parsed.cover).toBeNull();
+    expect(parsed.publishedAt).toBeNull();
   });
 });

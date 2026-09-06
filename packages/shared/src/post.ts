@@ -6,20 +6,38 @@ import { listResponse, locale, objectId, publishStatus, slug } from './common.js
  * Posts are single-language (see Technical PRD §13 Q2) — a post is written in
  * one language and tagged with it, rather than carrying parallel translations.
  */
-export const postInputSchema = z.object({
+
+/** Field shapes without defaults — shared by the create and patch schemas below. */
+const postFields = {
   slug,
   title: z.string().min(1).max(140),
-  lang: locale.default('en'),
+  lang: locale,
   excerpt: z.string().min(1).max(400),
   body: z.string().min(1).max(100_000), // markdown
-  tags: z.array(z.string().min(1).max(40)).max(10).default([]),
-  cover: objectId.nullable().default(null),
-  status: publishStatus.default('draft'),
-  publishedAt: z.iso.datetime().nullable().default(null),
+  tags: z.array(z.string().min(1).max(40)).max(10),
+  cover: objectId.nullable(),
+  status: publishStatus,
+  publishedAt: z.iso.datetime().nullable(),
+};
+
+/** Create: defaults apply, so a minimal body still yields a complete post. */
+export const postInputSchema = z.object({
+  ...postFields,
+  lang: postFields.lang.default('en'),
+  tags: postFields.tags.default([]),
+  cover: postFields.cover.default(null),
+  status: postFields.status.default('draft'),
+  publishedAt: postFields.publishedAt.default(null),
 });
 export type PostInput = z.infer<typeof postInputSchema>;
 
-export const postPatchSchema = postInputSchema.partial();
+/**
+ * PATCH: every field optional and NO defaults. Zod's .partial() does not
+ * suppress .default(), so deriving this from postInputSchema would silently
+ * re-inject values for fields the caller never sent — wiping tags, covers and
+ * publication dates on any partial update.
+ */
+export const postPatchSchema = z.object(postFields).partial();
 export type PostPatch = z.infer<typeof postPatchSchema>;
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
