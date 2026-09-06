@@ -1,6 +1,6 @@
 import { fileTypeFromBuffer } from 'file-type';
 import { imageSize } from 'image-size';
-import mongoose, { Types } from 'mongoose';
+import { Types } from 'mongoose';
 import {
   ALLOWED_IMAGE_MIME,
   ALLOWED_MIME,
@@ -38,26 +38,6 @@ export function toAssetWire(doc: IAsset): AssetWire {
     createdAt: doc.createdAt.toISOString(),
     updatedAt: doc.updatedAt.toISOString(),
   };
-}
-
-/**
- * `config/db.ts` turns on Mongoose's global `sanitizeFilter` (defends against a
- * raw request value smuggling a `$`-prefixed operator into a query). It works
- * by rewriting any `{ $lt: ... }`-shaped object it finds as a filter value into
- * `{ $eq: { $lt: ... } }`, UNLESS that exact object carries `mongoose.trusted`'s
- * marker. `cursorFilter()` (Task 3) builds its `$lt`/`$or` structure itself from
- * an already-decoded, already-typed `{ value: Date; id: ObjectId }` pair — it
- * is server-built, not raw user text — so it is safe to mark trusted. Without
- * this, every keyset-paginated query throws a CastError instead of paging.
- */
-function trustServerBuiltFilter<T>(value: T): T {
-  if (value !== null && typeof value === 'object') {
-    mongoose.trusted(value as object);
-    for (const child of Object.values(value as Record<string, unknown>)) {
-      trustServerBuiltFilter(child);
-    }
-  }
-  return value;
 }
 
 function objectIdOrThrow(id: string): Types.ObjectId {
@@ -143,9 +123,7 @@ export async function listAssets(
 ): Promise<{ items: AssetWire[]; nextCursor: string | null }> {
   const filter: Record<string, unknown> = {};
   if (query.kind) filter['kind'] = query.kind;
-  if (query.cursor) {
-    Object.assign(filter, trustServerBuiltFilter(cursorFilter('createdAt', decodeCursor(query.cursor))));
-  }
+  if (query.cursor) Object.assign(filter, cursorFilter('createdAt', decodeCursor(query.cursor)));
 
   const rows = await Asset.find(filter)
     .sort({ createdAt: -1, _id: -1 })

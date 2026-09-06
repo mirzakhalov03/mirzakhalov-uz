@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { Types } from 'mongoose';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import mongoose, { Types } from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 process.env['NODE_ENV'] = 'test';
 process.env['JWT_SECRET'] = 'test-jwt-secret-must-be-at-least-32-chars!!';
@@ -35,9 +36,16 @@ describe('cursor', () => {
     expect(() => decodeCursor(raw)).toThrow(ApiError);
   });
 
-  it('builds a keyset filter that breaks ties on _id', () => {
+  it('builds a keyset filter that breaks ties on _id, marked trusted for sanitizeFilter', () => {
+    // Each `$lt` clause must carry mongoose.trusted()'s marker — see the
+    // comment on cursorFilter() — or config/db.ts's global `sanitizeFilter`
+    // rewrites it into `{ $eq: { $lt: ... } }` and pagination throws instead
+    // of paging (covered end-to-end below).
     expect(cursorFilter('publishedAt', { value: when, id })).toEqual({
-      $or: [{ publishedAt: { $lt: when } }, { publishedAt: when, _id: { $lt: id } }],
+      $or: [
+        { publishedAt: mongoose.trusted({ $lt: when }) },
+        { publishedAt: when, _id: mongoose.trusted({ $lt: id }) },
+      ],
     });
   });
 });
@@ -70,5 +78,73 @@ describe('publishFilter', () => {
     const filter = publishFilter();
     expect(filter.status).toBe('published');
     expect(filter.publishedAt.$lte.getTime()).toBeLessThanOrEqual(Date.now());
+  });
+});
+
+/**
+ * Regression for a real bug, not a hypothetical one: `config/db.ts` enables
+ * Mongoose's `sanitizeFilter` project-wide. Left unmarked, sanitizeFilter
+ * rewrites `cursorFilter()`'s `{ $lt: ... }` clauses into `{ $eq: { $lt: ... } }`,
+ * which throws a CastError instead of paging — this was caught by Task 6's
+ * `GET /admin/assets` test, and would have hit every future keyset-paginated
+ * listing (post, project, document) the same way, since they all call this
+ * same helper.
+ *
+ * This runs an actual query against a live, sanitizeFilter-enabled connection
+ * rather than asserting on the returned object's shape, because the shape is
+ * not what breaks — a `{ $lt }` object looks identical whether or not it
+ * carries Mongoose's internal trusted-symbol marker. Only a real query proves
+ * the marker survived being merged into a caller's larger filter object via
+ * `Object.assign`, which is exactly how every current and future caller uses
+ * this helper (see `asset.service.ts`).
+ */
+interface ProbeDoc {
+  createdAt: Date;
+}
+
+describe('cursorFilter against a live sanitizeFilter connection', () => {
+  let mongo: MongoMemoryServer;
+  let disconnectDatabase: () => Promise<void>;
+  let Probe: import('mongoose').Model<ProbeDoc>;
+
+  beforeAll(async () => {
+    mongo = await MongoMemoryServer.create();
+    process.env['MONGODB_URI'] = mongo.getUri();
+
+    const [db, mongooseModule] = await Promise.all([import('../config/db.js'), import('mongoose')]);
+    ({ disconnectDatabase } = db);
+    await db.connectDatabase();
+
+    const mongooseDefault = mongooseModule.default;
+    Probe =
+      (mongooseDefault.models['CursorFilterProbe'] as import('mongoose').Model<ProbeDoc> | undefined) ??
+      mongooseDefault.model<ProbeDoc>(
+        'CursorFilterProbe',
+        new mongooseDefault.Schema<ProbeDoc>({ createdAt: { type: Date, required: true } }),
+      );
+  });
+
+  afterAll(async () => {
+    await disconnectDatabase();
+    await mongo.stop();
+  });
+
+  it('pages a real collection instead of throwing a CastError', async () => {
+    // Mirrors asset.service.ts's listAssets: a base filter with a sibling key,
+    // then cursorFilter()'s output merged in via Object.assign — the exact
+    // composition that must keep the trust marking alive.
+    const older = await Probe.create({ createdAt: new Date('2026-01-01T00:00:00.000Z') });
+    const newer = await Probe.create({ createdAt: new Date('2026-06-01T00:00:00.000Z') });
+
+    const filter: Record<string, unknown> = {};
+    Object.assign(
+      filter,
+      cursorFilter('createdAt', { value: newer.createdAt, id: newer._id as Types.ObjectId }),
+    );
+
+    const rows = await Probe.find(filter).sort({ createdAt: -1, _id: -1 }).exec();
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!._id.toString()).toBe(older._id.toString());
   });
 });

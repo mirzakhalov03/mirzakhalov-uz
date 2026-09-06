@@ -1,4 +1,4 @@
-import mongoose, { type Document, Schema, type Types } from 'mongoose';
+import mongoose, { type Document, type Model, Schema, type Types } from 'mongoose';
 import { locale, publishStatus, type Locale, type PublishStatus, type TocEntry } from '@portfolio/shared';
 import { renderMarkdown } from '../services/markdown.service.js';
 
@@ -104,4 +104,9 @@ postSchema.index(
   },
 );
 
-export const Post = mongoose.model<IPost>('Post', postSchema);
+// Idempotent registration: vitest's `singleFork` pool runs every test file in
+// one process against one shared mongoose instance, re-executing this module
+// per file while the model registry persists. A bare `mongoose.model(...)`
+// call would throw `OverwriteModelError` the second time this file loads.
+export const Post =
+  (mongoose.models['Post'] as Model<IPost> | undefined) ?? mongoose.model<IPost>('Post', postSchema);

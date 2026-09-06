@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { ApiError } from './api-error.js';
 
 export interface Cursor {
@@ -30,10 +30,34 @@ export function decodeCursor(raw: string): Cursor {
   return { value, id: new Types.ObjectId(id) };
 }
 
-/** The `WHERE` half of keyset pagination. */
+/**
+ * The `WHERE` half of keyset pagination.
+ *
+ * `config/db.ts` turns on Mongoose's `sanitizeFilter` project-wide (Technical
+ * PRD §11) — a deliberate defence against a raw request value smuggling a
+ * `$`-prefixed operator into a query. Its mechanism: any object it finds in
+ * filter-value position whose own keys start with `$` gets rewritten from
+ * `{ $lt: v }` to `{ $eq: { $lt: v } }`, which is exactly what breaks keyset
+ * pagination — unless that specific object carries `mongoose.trusted()`'s
+ * marker. (Marking only the *outer* filter is not enough: sanitizeFilter's
+ * check runs per nested value, not once at the top, so each `{ $lt: ... }`
+ * object must be marked individually — confirmed empirically against a live
+ * `mongodb-memory-server`, since even Mongoose's own documented top-level
+ * `trusted()` example does not survive its own sanitizer on this version.)
+ *
+ * This is a narrow, audited exemption, not a bypass of the protection: the
+ * `$lt` values here come from `decodeCursor()`, which only ever produces a
+ * `Date` and an `ObjectId` it has itself validated — never raw, unparsed user
+ * text. Marking trusted here, once, means every caller (asset, post, and any
+ * future keyset-paginated listing) gets a filter that is already safe, rather
+ * than each one having to rediscover this and remember to do it themselves.
+ */
 export function cursorFilter(key: string, cursor: Cursor): Record<string, unknown> {
   return {
-    $or: [{ [key]: { $lt: cursor.value } }, { [key]: cursor.value, _id: { $lt: cursor.id } }],
+    $or: [
+      { [key]: mongoose.trusted({ $lt: cursor.value }) },
+      { [key]: cursor.value, _id: mongoose.trusted({ $lt: cursor.id }) },
+    ],
   };
 }
 

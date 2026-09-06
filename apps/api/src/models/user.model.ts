@@ -64,4 +64,10 @@ userSchema.set('toJSON', {
   },
 });
 
-export const User = mongoose.model<IUser, IUserModel>('User', userSchema);
+// Idempotent registration: vitest's `singleFork` pool runs every test file in
+// one process against one shared mongoose instance, re-executing this module
+// per file while the model registry persists. A bare `mongoose.model(...)`
+// call would throw `OverwriteModelError` the second time this file loads.
+export const User =
+  (mongoose.models['User'] as IUserModel | undefined) ??
+  mongoose.model<IUser, IUserModel>('User', userSchema);
