@@ -68,3 +68,52 @@ Q4 (SSR/prerendering) stays out of scope for v2.
 Rotate the Telegram bot token. The old one is in `old-html-version/js/app.js` and in
 git history, so anyone can send through that bot. Revoke via BotFather, put the new
 token in the API's env, and never let it reach the client (PRD §11.1).
+
+## Blog API (M5)
+
+Base URL: `/api/v1`. Public reads need no credentials; every admin route
+requires the `token` cookie set by `POST /auth/login`.
+
+### Public
+
+| Method | Path | Query | Returns |
+|---|---|---|---|
+| `GET` | `/posts` | `lang, tag, q, limit, cursor` | `{ items: PostSummary[], nextCursor }` |
+| `GET` | `/posts/tags` | `lang` | `TagCount[]` |
+| `GET` | `/posts/feed.xml` | `lang` | Atom 1.0 |
+| `GET` | `/posts/:slug` | — | `PostDetail` |
+
+Drafts and future-dated posts are absent from all four.
+`?q=` returns up to 20 relevance-ordered results with `nextCursor: null`.
+Search is unstemmed (`default_language: 'none'` on both the index and the
+query), so it matches whole tokens only — `cats` will not match `cat`.
+
+### Admin
+
+| Method | Path | Body |
+|---|---|---|
+| `GET` | `/admin/posts` | — (`status, lang, q, limit, cursor`) |
+| `POST` | `/admin/posts` | `PostInput` |
+| `GET` | `/admin/posts/:id` | — |
+| `PATCH` | `/admin/posts/:id` | `PostPatch` |
+| `DELETE` | `/admin/posts/:id` | — |
+| `POST` | `/admin/assets` | `multipart/form-data`: `file`, `alt` |
+| `GET` | `/admin/assets` | — (`kind, limit, cursor`) |
+| `GET/PATCH/DELETE` | `/admin/assets/:id` | `{ alt }` on PATCH |
+
+### Types
+
+Import response types from `@portfolio/shared`:
+
+```ts
+import type { PostSummary, PostDetail, AdminPost, TagCount } from '@portfolio/shared';
+```
+
+`postListSchema`, `postDetailSchema` and `adminPostSchema` are the runtime
+validators for the same shapes.
+
+### Seeding
+
+```bash
+npm run seed:posts -w @portfolio/api
+```
