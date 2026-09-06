@@ -127,6 +127,29 @@ describe('POST /admin/posts', () => {
       .send(withoutBody);
     expect(res.status).toBe(400);
   });
+
+  it('413s an oversized payload with the standard error envelope, not a 500', async () => {
+    // express.json()'s limit is 400kb, chosen so it comfortably covers the
+    // schema's `body: z.string().max(100_000)` at UTF-8's real worst case of
+    // 3 bytes per character (100,000 * 3 = 300,000 bytes, well under
+    // 409,600). That means a body that both stays under 100,000 characters
+    // AND exceeds 400kb on the wire is not constructible — so this uses a
+    // 3-byte-per-character (non-ASCII) body long enough to exceed the byte
+    // limit, to exercise body-parser's real 413 -> error.middleware mapping.
+    // The point under test is that a transport-layer error never falls
+    // through to the generic 500 branch, regardless of the byte:character
+    // ratio that got it there.
+    const hugeBody = 'あ'.repeat(140_000); // 'あ', 3 bytes in UTF-8 -> ~420kb
+    const res = await request(app)
+      .post('/api/v1/admin/posts')
+      .set('Cookie', cookie)
+      .send({ ...draft, slug: 'oversized-payload', body: hugeBody });
+
+    expect(res.status).toBe(413);
+    expect(res.body.error).toBeDefined();
+    expect(typeof res.body.error.code).toBe('string');
+    expect(typeof res.body.error.message).toBe('string');
+  });
 });
 
 describe('GET /admin/posts', () => {

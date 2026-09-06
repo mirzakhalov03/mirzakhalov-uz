@@ -140,6 +140,12 @@ describe('server-built filters against a live sanitizeFilter connection', () => 
     Probe =
       (mongooseDefault.models['CursorFilterProbe'] as import('mongoose').Model<ProbeDoc> | undefined) ??
       mongooseDefault.model<ProbeDoc>('CursorFilterProbe', schema);
+
+    // Model.init() (which builds the `text` index above) runs fire-and-forget
+    // at compile time; neither save() nor Query.exec() awaits it, so the
+    // $text test below can race the background index build. Await it
+    // explicitly, mirroring post-model.test.ts's beforeAll.
+    await Probe.syncIndexes();
   });
 
   afterAll(async () => {

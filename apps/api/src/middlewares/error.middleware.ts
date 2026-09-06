@@ -26,6 +26,28 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     return;
   }
 
+  // Transport-layer errors (e.g. body-parser's http-errors instances, thrown
+  // when a payload exceeds express.json()'s limit) carry a numeric
+  // status/statusCode instead of being an ApiError. Map any such 4xx error
+  // onto the standard envelope so it never falls through to a 500.
+  if (typeof err === 'object' && err !== null) {
+    const status = (err as { status?: unknown }).status ?? (err as { statusCode?: unknown }).statusCode;
+    if (typeof status === 'number' && status >= 400 && status < 500) {
+      const type = (err as { type?: unknown }).type;
+      const code =
+        status === 413
+          ? 'PAYLOAD_TOO_LARGE'
+          : typeof type === 'string' && type
+            ? type.toUpperCase().replace(/[^A-Z0-9]+/g, '_')
+            : 'BAD_REQUEST';
+      const message = (err as { message?: unknown }).message;
+      res.status(status).json({
+        error: { code, message: typeof message === 'string' && message ? message : 'Request could not be processed' },
+      });
+      return;
+    }
+  }
+
   console.error('[error]', err);
   res.status(500).json({
     error: {

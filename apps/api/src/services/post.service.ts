@@ -143,27 +143,31 @@ export async function getPublishedPost(slug: string): Promise<PostDetail> {
   if (!doc) throw ApiError.notFound('Post not found');
 
   const publishedAt = doc.publishedAt ?? doc.createdAt;
-  const now = new Date();
+  // Source `status` and the "now" bound from the single shared definition of
+  // "publicly visible" rather than re-deriving them here — a reimplemented
+  // copy is how a draft (or a scheduled post) eventually leaks through a
+  // neighbour link.
+  const pub = publishFilter();
 
   // `prev` is the newer post and `next` the older one, matching the reading
   // order of a newest-first index. Both go through publishFilter's rules so a
   // draft cannot leak sideways through a neighbour link.
   const [prev, next] = await Promise.all([
     Post.findOne({
-      status: 'published',
+      status: pub.status,
       lang: doc.lang,
       // Bound is built by the server from the already-fetched document's own
       // publishedAt, never raw request input — mark trusted or sanitizeFilter
       // rewrites it into an uncastable `{ $eq: {...} }` and this throws instead
       // of returning the neighbour.
-      publishedAt: mongoose.trusted({ $gt: publishedAt, $lte: now }),
+      publishedAt: mongoose.trusted({ $gt: publishedAt, $lte: pub.publishedAt.$lte }),
     })
       .sort({ publishedAt: 1 })
       .select('slug title')
       .lean()
       .exec(),
     Post.findOne({
-      status: 'published',
+      status: pub.status,
       lang: doc.lang,
       // Same exemption as above: server-constructed bound, not raw input.
       publishedAt: mongoose.trusted({ $lt: publishedAt }),

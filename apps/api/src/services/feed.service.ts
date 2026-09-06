@@ -12,6 +12,9 @@ export function escapeXml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => XML_ENTITIES[char] ?? char);
 }
 
+// TODO(M4): source this from the profile singleton once that milestone lands.
+export const FEED_AUTHOR_NAME = 'Javohir Mirzakhalov';
+
 /**
  * Atom 1.0, hand-built — the whole format is five elements and a dependency
  * would not earn its place.
@@ -49,6 +52,9 @@ export function buildAtomFeed(
   <link rel="self" type="application/atom+xml" href="${escapeXml(options.feedUrl)}"/>
   <link rel="alternate" type="text/html" href="${escapeXml(`${site}/writing`)}"/>
   <updated>${updated.toISOString()}</updated>
+  <author>
+    <name>${escapeXml(FEED_AUTHOR_NAME)}</name>
+  </author>
 ${entries}
 </feed>
 `;

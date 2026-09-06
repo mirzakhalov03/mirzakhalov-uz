@@ -6,12 +6,15 @@ import { describe, expect, it } from 'vitest';
 import {
   adminPostSchema,
   assetListSchema,
+  documentPatchSchema,
   postDetailSchema,
   postInputSchema,
   postListSchema,
   postPatchSchema,
   postQuery,
   postSummarySchema,
+  profilePatchSchema,
+  projectPatchSchema,
   tagCountSchema,
 } from '@portfolio/shared';
 
@@ -131,5 +134,27 @@ describe('post wire schemas', () => {
     expect(parsed.status).toBe('draft');
     expect(parsed.cover).toBeNull();
     expect(parsed.publishedAt).toBeNull();
+  });
+});
+
+describe('other *.partial() patch schemas do not re-inject defaults', () => {
+  // Same landmine as postPatchSchema above, fixed the same way in
+  // document.ts, project.ts and profile.ts: Zod's .partial() does not
+  // suppress .default(), so a patch schema derived directly from its input
+  // schema would silently fill in defaults for fields the caller never sent.
+
+  it('documentPatchSchema', () => {
+    const parsed = documentPatchSchema.parse({ title: 'Updated title' });
+    expect(Object.keys(parsed)).toEqual(['title']);
+  });
+
+  it('projectPatchSchema', () => {
+    const parsed = projectPatchSchema.parse({ title: 'Updated title' });
+    expect(Object.keys(parsed)).toEqual(['title']);
+  });
+
+  it('profilePatchSchema', () => {
+    const parsed = profilePatchSchema.parse({ name: 'Updated name' });
+    expect(Object.keys(parsed)).toEqual(['name']);
   });
 });

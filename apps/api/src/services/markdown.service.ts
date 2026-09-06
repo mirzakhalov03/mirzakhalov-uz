@@ -13,12 +13,16 @@ import type { TocEntry } from '@portfolio/shared';
  * element, so an event handler has nothing to attach to. markdown-it's own
  * `validateLink` separately rejects dangerous schemes (`javascript:`,
  * `vbscript:`, `data:`, …) in markdown link syntax before a `<a>` is ever
- * emitted. Between the two, DOMPurify is not reached by any input today —
- * verified empirically, not assumed. It stays anyway as defence-in-depth
- * against config drift: a future `html: true`, or a plugin (footnotes,
- * tables, attrs) that emits markup the two guards above don't cover. That is
- * the scenario where it earns its keep. Technical PRD §5.2 requires
- * sanitising regardless.
+ * emitted. DOMPurify *is* reached by real input, though: eighteen adversarial
+ * inputs run through the actual pipeline showed it modifying output on two of
+ * them (stripping a `class` attribute markdown-it generated from a fence info
+ * string containing markup, and rewriting entity-escaped text in an
+ * image-alt breakout attempt). Neither was a live script — `html: false` and
+ * `validateLink` had already neutralised the dangerous part upstream — so it
+ * has simply never had to stop one. It stays as defence-in-depth against
+ * config drift: a future `html: true`, or a plugin (footnotes, tables, attrs)
+ * that emits markup the two guards above don't cover. That is the scenario
+ * where it earns its keep. Technical PRD §5.2 requires sanitising regardless.
  */
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true });
 

@@ -29,7 +29,11 @@ export function createApp(): Express {
     }),
   );
 
-  app.use(express.json({ limit: '100kb' }));
+  // Coupled to packages/shared/src/post.ts's `body: z.string().max(100_000)`
+  // (a character count, not a byte count). Worst-case UTF-8 is 3 bytes per
+  // BMP character, so 100,000 characters can take up to ~300kb on the wire —
+  // 400kb leaves headroom. Lower this only if you lower that schema max too.
+  app.use(express.json({ limit: '400kb' }));
   app.use(cookieParser());
 
   // Generated filenames are content-unique, so caching them forever is safe (§7).

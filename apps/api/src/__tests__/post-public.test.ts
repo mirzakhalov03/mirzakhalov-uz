@@ -225,6 +225,21 @@ describe('GET /posts/:slug', () => {
     expect(res.body.prev).toEqual({ slug: 'third', title: 'Third' });
   });
 
+  it('never links a future-dated post as a neighbour', async () => {
+    // 'later' is the only post newer than 'first' — if the neighbour query
+    // isn't bounded by "now" it is the only candidate for prev, so this pins
+    // the exact bound the prev/next queries share with publishFilter().
+    await Post.create([
+      { slug: 'first', title: 'First', excerpt: 'x', body: 'x', status: 'published', publishedAt: day(1) },
+      {
+        slug: 'later', title: 'Later', excerpt: 'x', body: 'x',
+        status: 'published', publishedAt: new Date(Date.now() + 86_400_000),
+      },
+    ]);
+    const res = await request(app).get('/api/v1/posts/first');
+    expect(res.body.prev).toBeNull();
+  });
+
   it('404s a draft requested by slug', async () => {
     await seed();
     expect((await request(app).get('/api/v1/posts/a-draft')).status).toBe(404);
@@ -251,6 +266,12 @@ describe('GET /posts/feed.xml', () => {
     expect(res.text).toContain('<title>Middle</title>');
     expect(res.text).not.toContain('A draft');
     expect(res.text).not.toContain('Scheduled');
+  });
+
+  it('carries a feed-level author, as RFC 4287 §4.1.1 requires', async () => {
+    await seed();
+    const res = await request(app).get('/api/v1/posts/feed.xml');
+    expect(res.text).toContain('<author>\n    <name>Javohir Mirzakhalov</name>\n  </author>');
   });
 
   it('links entries at the public site, not the API', async () => {

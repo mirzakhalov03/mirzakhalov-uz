@@ -31,19 +31,35 @@ export const stackItemSchema = z.object({
   frequency: z.enum(['daily', 'often']),
 });
 
-export const profileInputSchema = z.object({
+/** Field shapes without defaults — shared by the create and patch schemas below. */
+const profileFields = {
   name: z.string().min(1).max(80),
   role: z.string().min(1).max(120),
   location: z.string().min(1).max(120),
   coords: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }),
   bio: bilingual(4000),
   now: z.object({ text: z.string().max(2000), updatedAt: z.iso.datetime().optional() }),
-  socials: z.array(socialSchema).max(12).default([]),
-  scores: z.array(scoreSchema).max(12).default([]),
-  languages: z.array(languageSchema).max(12).default([]),
-  stack: z.array(stackItemSchema).max(40).default([]),
+  socials: z.array(socialSchema).max(12),
+  scores: z.array(scoreSchema).max(12),
+  languages: z.array(languageSchema).max(12),
+  stack: z.array(stackItemSchema).max(40),
+};
+
+/** Create: defaults apply, so a minimal profile still yields a complete one. */
+export const profileInputSchema = z.object({
+  ...profileFields,
+  socials: profileFields.socials.default([]),
+  scores: profileFields.scores.default([]),
+  languages: profileFields.languages.default([]),
+  stack: profileFields.stack.default([]),
 });
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 
-export const profilePatchSchema = profileInputSchema.partial();
+/**
+ * PATCH: every field optional and NO defaults. Zod's .partial() does not
+ * suppress .default(), so deriving this from profileInputSchema would
+ * silently re-inject values for fields the caller never sent — wiping
+ * `socials`, `scores`, `languages` and `stack` on any partial update.
+ */
+export const profilePatchSchema = z.object(profileFields).partial();
 export type ProfilePatch = z.infer<typeof profilePatchSchema>;
