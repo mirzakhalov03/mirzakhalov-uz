@@ -3,6 +3,7 @@ import { healthRouter } from './health.routes.js';
 import { authRouter } from './auth.routes.js';
 import { adminAssetRouter } from './admin-asset.routes.js';
 import { postRouter } from './post.routes.js';
+import { adminPostRouter } from './admin-post.routes.js';
 
 /**
  * Everything under /api/v1. Feature routers land here as milestones ship:
@@ -18,3 +19,5 @@ apiRouter.use(authRouter);
 apiRouter.use(adminAssetRouter);
 // M5 — blog, public reads
 apiRouter.use(postRouter);
+// M5 — blog, admin CRUD
+apiRouter.use(adminPostRouter);
