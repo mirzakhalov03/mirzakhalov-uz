@@ -84,25 +84,34 @@ describe('publishFilter', () => {
 /**
  * Regression for a real bug, not a hypothetical one: `config/db.ts` enables
  * Mongoose's `sanitizeFilter` project-wide. Left unmarked, sanitizeFilter
- * rewrites `cursorFilter()`'s `{ $lt: ... }` clauses into `{ $eq: { $lt: ... } }`,
- * which throws a CastError instead of paging — this was caught by Task 6's
- * `GET /admin/assets` test, and would have hit every future keyset-paginated
- * listing (post, project, document) the same way, since they all call this
- * same helper.
+ * rewrites any nested `{ $op: v }` filter value into `{ $eq: { $op: v } }`,
+ * which Mongo cannot cast — a CastError instead of a result — and rejects a
+ * top-level `$text` value outright unless it is marked trusted. This was
+ * first caught by Task 6's `GET /admin/assets` test for `cursorFilter()`'s
+ * `{ $lt: ... }` clauses, and, empirically, hits every other server-built
+ * `$`-shaped filter value the same way: `publishFilter()`'s `{ $lte: ... }`,
+ * the post service's prev/next neighbour bounds, and both of its `$text`
+ * search branches. This block now covers the two shapes `cursorFilter()`
+ * does not already cover — a `publishFilter()`-style `find()` and a `$text`
+ * query — since post.service.ts composes both without going through
+ * `cursorFilter()` at all.
  *
  * This runs an actual query against a live, sanitizeFilter-enabled connection
  * rather than asserting on the returned object's shape, because the shape is
  * not what breaks — a `{ $lt }` object looks identical whether or not it
  * carries Mongoose's internal trusted-symbol marker. Only a real query proves
  * the marker survived being merged into a caller's larger filter object via
- * `Object.assign`, which is exactly how every current and future caller uses
- * this helper (see `asset.service.ts`).
+ * `Object.assign`/spread, which is exactly how every current and future
+ * caller uses these helpers (see `asset.service.ts`, `post.service.ts`).
  */
 interface ProbeDoc {
   createdAt: Date;
+  status: string;
+  title: string;
+  publishedAt?: Date;
 }
 
-describe('cursorFilter against a live sanitizeFilter connection', () => {
+describe('server-built filters against a live sanitizeFilter connection', () => {
   let mongo: MongoMemoryServer;
   let disconnectDatabase: () => Promise<void>;
   let Probe: import('mongoose').Model<ProbeDoc>;
@@ -116,12 +125,21 @@ describe('cursorFilter against a live sanitizeFilter connection', () => {
     await db.connectDatabase();
 
     const mongooseDefault = mongooseModule.default;
+    const schema = new mongooseDefault.Schema<ProbeDoc>({
+      createdAt: { type: Date, required: true },
+      status: { type: String, required: true },
+      title: { type: String, required: true },
+      // Typed as Date, mirroring post.model.ts's `publishedAt` path — the cast
+      // that fails on an unmarked `{ $lte: ... }` only happens against a real
+      // Date-typed schema path, so this field must exist for the test below to
+      // actually exercise the bug rather than silently matching nothing.
+      publishedAt: { type: Date },
+    });
+    schema.index({ title: 'text' });
+
     Probe =
       (mongooseDefault.models['CursorFilterProbe'] as import('mongoose').Model<ProbeDoc> | undefined) ??
-      mongooseDefault.model<ProbeDoc>(
-        'CursorFilterProbe',
-        new mongooseDefault.Schema<ProbeDoc>({ createdAt: { type: Date, required: true } }),
-      );
+      mongooseDefault.model<ProbeDoc>('CursorFilterProbe', schema);
   });
 
   afterAll(async () => {
@@ -133,8 +151,16 @@ describe('cursorFilter against a live sanitizeFilter connection', () => {
     // Mirrors asset.service.ts's listAssets: a base filter with a sibling key,
     // then cursorFilter()'s output merged in via Object.assign — the exact
     // composition that must keep the trust marking alive.
-    const older = await Probe.create({ createdAt: new Date('2026-01-01T00:00:00.000Z') });
-    const newer = await Probe.create({ createdAt: new Date('2026-06-01T00:00:00.000Z') });
+    const older = await Probe.create({
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      status: 'published',
+      title: 'older',
+    });
+    const newer = await Probe.create({
+      createdAt: new Date('2026-06-01T00:00:00.000Z'),
+      status: 'published',
+      title: 'newer',
+    });
 
     const filter: Record<string, unknown> = {};
     Object.assign(
@@ -146,5 +172,42 @@ describe('cursorFilter against a live sanitizeFilter connection', () => {
 
     expect(rows).toHaveLength(1);
     expect(rows[0]!._id.toString()).toBe(older._id.toString());
+  });
+
+  it('a find() composing publishFilter() returns rows instead of throwing a CastError', async () => {
+    // publishFilter()'s own `{ $lte: ... }` clause is what post.service.ts's
+    // public reads spread into find() — this is that exact composition, not
+    // a synthetic one, against a real sanitizeFilter-enabled connection. The
+    // document must actually have a past `publishedAt` or the assertion below
+    // proves nothing: it would pass just as well if the query matched zero
+    // rows for an unrelated reason.
+    await Probe.create({
+      createdAt: new Date('2020-01-01'),
+      status: 'published',
+      title: 'visible',
+      publishedAt: new Date('2020-01-01'),
+    });
+
+    const filter: Record<string, unknown> = { ...publishFilter() };
+    const rows = await Probe.find(filter).exec();
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.title).toBe('visible');
+  });
+
+  it('a trusted $text query executes instead of throwing a MongooseError', async () => {
+    // Mirrors post.service.ts's search branches: a plain filter with a
+    // sibling key, plus a $text value built by the server from an
+    // already-validated query param and marked trusted.
+    await Probe.create({ createdAt: new Date(), status: 'published', title: 'searchable phrase' });
+
+    const filter: Record<string, unknown> = {
+      status: 'published',
+      $text: mongoose.trusted({ $search: 'searchable' }),
+    };
+    const rows = await Probe.find(filter).exec();
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.title).toBe('searchable phrase');
   });
 });

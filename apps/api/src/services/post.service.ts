@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import type {
   AdminPost,
   AdminPostQuery,
@@ -111,8 +111,11 @@ export async function listPublishedPosts(
   if (query.tag) base['tags'] = query.tag;
 
   if (query.q) {
+    // The $search value is constructed by the server from an already-validated
+    // query param, never a raw request value — sanitizeFilter rejects an
+    // unmarked $text value outright, so it must carry trusted()'s marker.
     const rows = await Post.find(
-      { ...base, $text: { $search: query.q } },
+      { ...base, $text: mongoose.trusted({ $search: query.q }) },
       { score: { $meta: 'textScore' } },
     )
       .sort({ score: { $meta: 'textScore' } })
@@ -149,7 +152,11 @@ export async function getPublishedPost(slug: string): Promise<PostDetail> {
     Post.findOne({
       status: 'published',
       lang: doc.lang,
-      publishedAt: { $gt: publishedAt, $lte: now },
+      // Bound is built by the server from the already-fetched document's own
+      // publishedAt, never raw request input — mark trusted or sanitizeFilter
+      // rewrites it into an uncastable `{ $eq: {...} }` and this throws instead
+      // of returning the neighbour.
+      publishedAt: mongoose.trusted({ $gt: publishedAt, $lte: now }),
     })
       .sort({ publishedAt: 1 })
       .select('slug title')
@@ -158,7 +165,8 @@ export async function getPublishedPost(slug: string): Promise<PostDetail> {
     Post.findOne({
       status: 'published',
       lang: doc.lang,
-      publishedAt: { $lt: publishedAt },
+      // Same exemption as above: server-constructed bound, not raw input.
+      publishedAt: mongoose.trusted({ $lt: publishedAt }),
     })
       .sort({ publishedAt: -1 })
       .select('slug title')
@@ -206,7 +214,9 @@ export async function listAllPosts(
   const filter: Record<string, unknown> = {};
   if (query.status) filter['status'] = query.status;
   if (query.lang) filter['lang'] = query.lang;
-  if (query.q) filter['$text'] = { $search: query.q };
+  // Same exemption as the public search branch: server-built from a validated
+  // query param, never raw request input, so it must carry trusted()'s marker.
+  if (query.q) filter['$text'] = mongoose.trusted({ $search: query.q });
   if (query.cursor) Object.assign(filter, cursorFilter('updatedAt', decodeCursor(query.cursor)));
 
   const rows = await Post.find(filter)
