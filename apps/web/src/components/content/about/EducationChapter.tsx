@@ -3,13 +3,17 @@ import { Data } from '../../../primitives/Data.js';
 import { DimensionRow } from '../DimensionRow.js';
 import { InkRule } from '../../ui/InkRule.js';
 import { Plate } from '../../../primitives/Plate.js';
+import { formatPartialDate } from '../../../lib/date-label.js';
 import { certificates, education } from '../../../content/profile.js';
 import type { EducationEntry } from '../../../content/types.js';
 
-/** '2024-09' → '2024'. Dates are mono metadata, so they stay terse. */
+/** 'Sep 2024 — Jan 2028', or a single date when `from` and `to` match. Shares
+ *  `formatPartialDate` with the timeline so both chapters render one date
+ *  format instead of two. */
 function span(entry: EducationEntry): string {
   const to = entry.to ?? 'present';
-  return entry.from === to ? entry.from : `${entry.from} — ${to}`;
+  if (entry.from === to) return formatPartialDate(entry.from);
+  return `${formatPartialDate(entry.from)} — ${to === 'present' ? to : formatPartialDate(to)}`;
 }
 
 function EducationCard({ entry }: { entry: EducationEntry }) {
@@ -57,7 +61,7 @@ export function EducationChapter() {
 
       <div className="mt-6 lg:mt-8">
         <div className="flex items-center gap-2">
-          <Data tone="accent" className="shrink-0">
+          <Data as="h4" tone="accent" className="shrink-0">
             Certificates
           </Data>
           <InkRule seed={5} className="text-line" />
@@ -83,7 +87,7 @@ export function EducationChapter() {
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {awarded.map((certificate) => (
               <Plate key={certificate.name} className="flex flex-col gap-1 p-3">
-                <h4 className="t-h4 text-fg">{certificate.name}</h4>
+                <h5 className="t-h4 text-fg">{certificate.name}</h5>
                 {certificate.issuer ? <Data>by {certificate.issuer}</Data> : null}
               </Plate>
             ))}

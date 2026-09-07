@@ -40,8 +40,6 @@ export function scrollToFlow(target: HTMLElement, offset = 0): void {
 
   window.scrollTo({
     top: Math.max(0, top - offset),
-    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      ? 'auto'
-      : 'smooth',
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
   });
 }

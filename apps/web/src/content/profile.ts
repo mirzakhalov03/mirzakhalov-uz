@@ -150,7 +150,8 @@ export const experience: ExperienceEntry[] = [
     role: 'IELTS mentor & ESL teacher',
     from: '2023',
     to: '2024',
-    detail: 'IELTS preparation and general English, mostly with teenagers sitting the exam that year.',
+    detail:
+      'IELTS preparation and general English, mostly with teenagers sitting the exam that year.',
   },
   {
     org: 'LangApex Edu-Center',

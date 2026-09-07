@@ -22,6 +22,7 @@ export function ExperienceChapter() {
             key={`${entry.org}-${entry.from}`}
             entry={entry}
             side={index % 2 === 0 ? 'left' : 'right'}
+            index={index}
           />
         ))}
       </div>

@@ -25,8 +25,14 @@ function stuckHeight(): number {
   );
   const bar = Number.isFinite(root) ? root : 57;
 
+  /* `.about-nav` is position: sticky in both media blocks, so computed
+     position can't tell the mobile bar from the desktop rail — only the
+     breakpoint can. Use the media query itself rather than
+     window.innerWidth: innerWidth includes a classic scrollbar's width while
+     the CSS breakpoint does not, so near 1024px the two could disagree about
+     which layout is live. */
   const nav = document.querySelector<HTMLElement>('.about-nav');
-  const navStuck = nav && getComputedStyle(nav).position === 'sticky' && window.innerWidth < 1024;
+  const navStuck = nav && window.matchMedia('(max-width: 1023.98px)').matches;
 
   return bar + (navStuck && nav ? nav.offsetHeight : 0) + 16;
 }

@@ -870,7 +870,7 @@
    anything — index times step, and no layout read on any frame. */
 @media (min-width: 1024px) {
   .about-nav {
-    --about-nav-step: 40px;
+    --about-nav-step: calc(var(--spacing) * 5);
     position: sticky;
     top: calc(var(--bar-h) + var(--spacing) * 4);
     align-self: start;
@@ -929,6 +929,10 @@
   top: 0;
   bottom: 0;
   left: calc(var(--spacing) * 1.5);
+  /* The rule is a 6px-wide box (INK_WEIGHT) whose stroke sits centred at
+     x = 3; without this the stroke lands 3px right of the node/tether
+     centreline instead of on it. */
+  translate: -50% 0;
   color: var(--line-strong);
   pointer-events: none;
 }
@@ -987,6 +991,12 @@
   .timeline__entry[data-side='left'] {
     grid-column: 1;
     text-align: right;
+  }
+
+  /* text-align doesn't reach flex children — the org/chip row is a flex
+     row positioned by justify-content, so it needs its own rule. */
+  .timeline__entry[data-side='left'] .timeline__head {
+    justify-content: flex-end;
   }
 
   .timeline__entry[data-side='right'] {
