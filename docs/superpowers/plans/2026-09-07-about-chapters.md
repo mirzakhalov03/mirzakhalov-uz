@@ -95,28 +95,22 @@ implicitly include this section.
 
 ---
 
-## Task 0: Confirm the content (blocking, no code)
+## Task 0: Content — RESOLVED 2026-09-07
 
-The reference sketches use placeholders. These facts must be settled before
-Task 1, because Task 1 writes them into `profile.ts`.
+Settled by the user. No action required; Task 1 writes exactly what is below.
 
-- [ ] **Step 1: Get answers to these five questions**
+1. **LangApex appears twice.** Studied there 2019–2022 (education), then taught
+   there 2022–2023 (experience). Both entries ship.
+2. **Vention** — Software Engineer, March 2026 – present. Confirmed.
+3. **SATashkent** — Frontend Engineer, November 2025 – March 2026. Confirmed.
+4. **Node.js Mastery, Udemy** — keep.
+5. **Certified Claude Architect, Anthropic** — keep, as given.
 
-1. **LangApex** — the sketch lists it under *Education*, 2019–2022.
-   `profile.ts:86` has "LangApex Edu-Center", ESL teacher, 2022–2023, as a
-   *job*. Which is it? Both (studied there, then taught there)?
-2. **Vention** — Software Engineer, March 2026 – present. Correct?
-3. **SATashkent** — Frontend Engineer, November 2025 – March 2026. Correct?
-4. **"NodeJS Mastery by Udemy"** — a real certificate, or filler?
-5. **"Certified Claude Architect by Anthropic"** — reads as a joke. Drop it?
-
-- [ ] **Step 2: Get one line of detail for each entry**
-
-Every education and experience entry needs one sentence. The sketch has Lorem
-Ipsum. Ask for them, or write drafts in the voice of `profile.ts:19-21` — plain,
-specific, no adjectives — and get them approved.
-
-- [ ] **Step 3: Record the answers at the top of Task 1 before writing code**
+**Detail copy is drafted, not dictated.** The sketch had Lorem Ipsum, so the
+`detail` lines in Task 1 were written to match the voice of `profile.ts:19-21`
+— plain, specific, no adjectives. They are biographical claims: the user has
+been asked to correct them. **If the user has supplied replacements, use those
+verbatim and ignore the drafts below.**
 
 ---
 
@@ -202,8 +196,7 @@ import type {
 ```
 
 Then replace the `experience` export (currently lines 84-87) and add the two new
-ones. **Substitute the answers from Task 0** — the values below are the
-reconstruction, and the ⚠ lines are the ones that were in question:
+ones. This is the resolved content from Task 0 — write it verbatim:
 
 ```ts
 export const education: EducationEntry[] = [
@@ -212,7 +205,7 @@ export const education: EducationEntry[] = [
     qualification: 'BSc, Computer Science',
     from: '2024',
     to: '2028',
-    detail: 'TODO — one line from Task 0',
+    detail: 'Computer science on INHA’s Korean curriculum, taught in English.',
     lead: true,
   },
   {
@@ -220,20 +213,23 @@ export const education: EducationEntry[] = [
     qualification: 'Frontend development',
     from: '2024-01',
     to: '2024-09',
-    detail: 'TODO — one line from Task 0',
+    detail:
+      'Nine months of frontend, full time — JavaScript through to React, and the first place I shipped something somebody else had to maintain.',
   },
-  // ⚠ Task 0 question 1 — keep, move to `experience`, or both.
+  /* The other half of this is in `experience`: three years as a student here,
+     then a year teaching in the same building. */
   {
-    org: 'LangApex',
+    org: 'LangApex Edu-Center',
+    qualification: 'English',
     from: '2019',
     to: '2022',
-    detail: 'TODO — one line from Task 0',
+    detail: 'Three years of English here as a student, which is how I ended up teaching in it.',
   },
 ];
 
 /**
- * Ordered strongest first. A certificate carrying a `score` is drawn as a
- * dimension row; one without is drawn as a card.
+ * A certificate carrying a `score` is drawn as a dimension row against its
+ * scale; one without is drawn as a card.
  */
 export const certificates: Certificate[] = [
   {
@@ -250,46 +246,46 @@ export const certificates: Certificate[] = [
     name: 'GPA',
     score: { value: 4, scaleMin: 0, scaleMax: 4, display: '4.00' },
   },
-  // ⚠ Task 0 question 4 — drop this entry if it was filler.
-  { name: 'Node.js', issuer: 'Udemy' },
+  { name: 'Node.js Mastery', issuer: 'Udemy' },
+  { name: 'Certified Claude Architect', issuer: 'Anthropic' },
 ];
 
 /** Reverse chronological — the timeline reads newest at the top. */
 export const experience: ExperienceEntry[] = [
-  // ⚠ Task 0 question 2
   {
     org: 'Vention',
     role: 'Software Engineer',
     from: '2026-03',
     to: null,
-    detail: 'TODO — one line from Task 0',
+    detail: 'Building product interfaces in React and TypeScript.',
   },
-  // ⚠ Task 0 question 3
   {
     org: 'SATashkent',
     role: 'Frontend Engineer',
     from: '2025-11',
     to: '2026-03',
-    detail: 'TODO — one line from Task 0',
+    detail: 'Frontend for the platform students use to prepare for the SAT.',
   },
   {
     org: 'Ziyokor Education',
     role: 'IELTS mentor & ESL teacher',
     from: '2023',
     to: '2024',
-    detail: 'TODO — one line from Task 0',
+    detail: 'IELTS preparation and general English, mostly with teenagers sitting the exam that year.',
   },
   {
     org: 'LangApex Edu-Center',
     role: 'ESL teacher',
     from: '2022',
     to: '2023',
-    detail: 'TODO — one line from Task 0',
+    detail: 'General English, in the classes I had been sitting in three years earlier.',
   },
 ];
 ```
 
-No `TODO` string may survive into the commit — Task 0 supplies the copy.
+Note the curly apostrophe in INHA’s and the straight one in `"Najot Ta'lim"` —
+both are deliberate; the file already mixes them (`profile.ts:96` uses U+02BB for
+Uzbek). Do not "normalise" them.
 
 - [ ] **Step 3: Verify it typechecks**
 
@@ -1707,9 +1703,9 @@ No gaps.
 
 **Placeholder scan**
 
-The `'TODO — one line from Task 0'` strings in Task 1 are the one intentional
-placeholder in the plan, and they are gated: Task 0 is blocking, Task 1 Step 2
-says no `TODO` may reach the commit. Everything else is literal code.
+The plan contains no placeholders. Task 0 is resolved and Task 1 carries literal
+content; every other step is literal code.
+
 
 **Type consistency**
 
