@@ -10,6 +10,9 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // Fail loudly instead of silently drifting to 5174 — the API's CORS
+    // allowlist is pinned to 5173, so a shifted port breaks every request.
+    strictPort: true,
   },
   build: {
     // Surfaces regressions against the design doc's performance budget early.
