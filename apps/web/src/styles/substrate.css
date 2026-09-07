@@ -771,3 +771,21 @@
     transform: rotate(13deg);
   }
 }
+
+/* ==========================================================================
+   The About chapters (§01, design doc §4.2 ③)
+   ========================================================================== */
+
+/* The drafted hand, second and last outing. The face is subset to A–Z in
+   global.css, so this treatment MUST uppercase or lowercase silently falls
+   back to Archivo mid-word. Set at h3 rather than anywhere smaller because
+   Cabin Sketch is a double outline with a hatched fill — below about 20px the
+   two lines close up and it reads as mud. */
+.t-chapter {
+  font-family: var(--font-sketch);
+  font-size: var(--text-h3);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
