@@ -16,10 +16,8 @@ type AboutNavProps = {
  * preventDefaults so it can substitute the flow-aware scroll.
  */
 export function AboutNav({ chapters, active, onNavigate }: AboutNavProps) {
-  const index = Math.max(
-    0,
-    chapters.findIndex((chapter) => chapter.id === active),
-  );
+  const index = chapters.findIndex((chapter) => chapter.id === active);
+  const hasCurrent = index >= 0;
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
     /* Let the browser handle a modified click — a new tab on a #hash is odd
@@ -33,7 +31,8 @@ export function AboutNav({ chapters, active, onNavigate }: AboutNavProps) {
     <nav
       aria-label="About chapters"
       className="about-nav"
-      style={{ '--about-nav-index': index } as CSSProperties}
+      data-has-current={hasCurrent || undefined}
+      style={hasCurrent ? ({ '--about-nav-index': index } as CSSProperties) : undefined}
     >
       <ul className="about-nav__list">
         {chapters.map((chapter) => {

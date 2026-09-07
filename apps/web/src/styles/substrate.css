@@ -894,6 +894,13 @@
     transition: translate var(--duration-micro) var(--ease-plate);
   }
 
+  /* Marker and highlight are two derivations of the same fact, so they must
+     agree: no current chapter, no marker. Without this the marker would rest
+     on the first item while no link was marked. */
+  .about-nav:not([data-has-current]) .about-nav__list::before {
+    opacity: 0;
+  }
+
   .about-nav__link {
     height: var(--about-nav-step);
   }
