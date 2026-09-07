@@ -1,5 +1,5 @@
 import { Data } from '../../primitives/Data.js';
-import type { Score } from '../../content/types.js';
+import type { CertificateScore } from '../../content/types.js';
 
 /**
  * An achievement drawn as a measured dimension rather than a trophy.
@@ -9,13 +9,13 @@ import type { Score } from '../../content/types.js';
  * "SAT 1330" means nothing to a reader who doesn't know the range; "1330 on
  * 400–1600" means something immediately, and is more honest besides (§3.6).
  */
-export function DimensionRow({ score }: { score: Score }) {
+export function DimensionRow({ label, score }: { label: string; score: CertificateScore }) {
   const fraction = (score.value - score.scaleMin) / (score.scaleMax - score.scaleMin);
 
   return (
     <div className="py-2">
       <div className="flex items-baseline justify-between gap-3">
-        <Data tone="muted">{score.label}</Data>
+        <Data tone="muted">{label}</Data>
         <span className="t-numeral text-measured" data-numeric>
           {score.display}
         </span>

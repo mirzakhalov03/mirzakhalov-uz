@@ -245,6 +245,19 @@ The solid button's full inversion on hover is deliberate — a plate flipping, n
 - *Filtered work index, no matches:* names the active filters, one click to clear.
 - *Joke page:* the card is never empty — first joke seeded on mount, min-height reserved.
 
+**Ink rule** — the one organic mark in a system that is otherwise flat and
+square. A 1px stroke whose wobble is the sum of three sine terms at fixed
+frequencies, generated per seed rather than drawn, so it satisfies principle 1:
+the mark can say where it came from. Used for chapter headings and the
+timeline spine. It is the only exception to §3.4, and it is an exception about
+*line quality*, never about radius — every box on the page is still square.
+
+**Chapter rail** — the About section's table of contents. A sticky rail from
+`lg`, a sticky horizontal bar below, both plain `position: sticky` nested inside
+the About panel so the nav leaves when the section does. Deliberately a `<nav>`
+of anchors rather than an ARIA tablist: every chapter stays in the DOM, so
+`role="tab"` would misreport two thirds of the section as unavailable.
+
 ---
 
 ## 4. Page-by-Page
@@ -276,7 +289,17 @@ The current copy is placeholder-grade and should be rewritten. `"Welcome to my w
 
 Moving this above About is the single largest UX improvement in the proposal.
 
-**③ About** — ~140 words at a 60-character measure, plus the stack matrix, with the measured column (scores, languages) alongside.
+**③ About** — three chapters behind one anchored rail: **Story** (the bio on
+its bone island, the current state, languages), **Education** (institution
+cards, then certificates — anything carrying a number is drawn as a dimension
+row against its scale, not asserted on a card), and **Experience** (an
+alternating timeline about an inked spine, closing on the stack comb).
+
+The panel is several viewports tall and every chapter is rendered at all times.
+That is what makes it read as one continuous story rather than three pages, and
+it is also what keeps the panel's height constant — a tab that showed and hid
+content would resize the panel and send `useStack` re-measuring every panel
+below it mid-interaction.
 
 **④ Writing** — three most recent notes: mono date, title, one line, language chip.
 

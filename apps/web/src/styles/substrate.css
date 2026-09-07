@@ -771,3 +771,258 @@
     transform: rotate(13deg);
   }
 }
+
+/* ==========================================================================
+   The About chapters (§01, design doc §4.2 ③)
+   ========================================================================== */
+
+/* The drafted hand, second and last outing. The face is subset to A–Z in
+   global.css, so this treatment MUST uppercase or lowercase silently falls
+   back to Archivo mid-word. Set at h3 rather than anywhere smaller because
+   Cabin Sketch is a double outline with a hatched fill — below about 20px the
+   two lines close up and it reads as mud. */
+.t-chapter {
+  font-family: var(--font-sketch);
+  font-size: var(--text-h3);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+/* --- the chapter navigation ----------------------------------------------
+   One component, two treatments. Below lg it is a bar under the top bar;
+   from lg it is a rail beside the content. Both are plain position: sticky
+   inside the About panel, which is what makes the nav leave when the section
+   ends without a single line of unpin logic. */
+
+.about-nav__list {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-nav__link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--fg-muted);
+  text-decoration: none;
+  transition: color var(--duration-micro) var(--ease-plate);
+}
+
+.about-nav__link[data-current] {
+  color: var(--accent-text);
+}
+
+/* The bar. Opaque, not the top bar's translucent + blur: two stacked
+   translucent layers would let content ghost through both. */
+@media (max-width: 1023.98px) {
+  .about-nav {
+    position: sticky;
+    top: var(--bar-h);
+    z-index: 20;
+    /* Break the container gutter so the rule under the bar runs edge to edge,
+       then put the gutter back on the contents. Page's gutter is px-3
+       sm:px-4 (24px below 640px, 32px from 640px up to lg), so the same two
+       numbers show up here — the nested rule below switches at Page's own
+       breakpoint. */
+    margin-inline: calc(var(--spacing) * -3);
+    padding-inline: calc(var(--spacing) * 3);
+    padding-block: calc(var(--spacing) * 1.5);
+    background-color: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (min-width: 640px) {
+    .about-nav {
+      margin-inline: calc(var(--spacing) * -4);
+      padding-inline: calc(var(--spacing) * 4);
+    }
+  }
+
+  .about-nav__list {
+    gap: calc(var(--spacing) * 2);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .about-nav__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .about-nav__link {
+    padding: calc(var(--spacing) * 0.75) calc(var(--spacing) * 1.25);
+    white-space: nowrap;
+    /* Transparent at rest so the box appearing costs no layout shift. */
+    border: 1px solid transparent;
+    transition:
+      color var(--duration-micro) var(--ease-plate),
+      border-color var(--duration-micro) var(--ease-plate);
+  }
+
+  .about-nav__link[data-current] {
+    border-color: var(--line-strong);
+  }
+}
+
+/* The rail. A fixed step is what lets the marker move without measuring
+   anything — index times step, and no layout read on any frame. */
+@media (min-width: 1024px) {
+  .about-nav {
+    --about-nav-step: calc(var(--spacing) * 5);
+    position: sticky;
+    top: calc(var(--bar-h) + var(--spacing) * 4);
+    align-self: start;
+  }
+
+  .about-nav__list {
+    position: relative;
+    flex-direction: column;
+    padding-left: calc(var(--spacing) * 2);
+  }
+
+  .about-nav__list::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: calc((var(--about-nav-step) - var(--spacing) * 2) / 2);
+    width: 2px;
+    height: calc(var(--spacing) * 2);
+    background-color: var(--accent);
+    translate: 0 calc(var(--about-nav-index, 0) * var(--about-nav-step));
+    transition: translate var(--duration-micro) var(--ease-plate);
+  }
+
+  /* Marker and highlight are two derivations of the same fact, so they must
+     agree: no current chapter, no marker. Without this the marker would rest
+     on the first item while no link was marked. */
+  .about-nav:not([data-has-current]) .about-nav__list::before {
+    opacity: 0;
+  }
+
+  .about-nav__link {
+    height: var(--about-nav-step);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-nav__list::before {
+    transition: none;
+  }
+}
+
+/* --- the experience timeline ---------------------------------------------
+   A spine with entries hung off it. Down the left edge on a phone, because a
+   single column has no middle to alternate about; centred from lg, where
+   alternating is what makes a list of four jobs read as a passage of time
+   rather than as four more cards. */
+
+.timeline {
+  position: relative;
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+}
+
+.timeline__spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--spacing) * 1.5);
+  /* The rule is a 6px-wide box (INK_WEIGHT) whose stroke sits centred at
+     x = 3; without this the stroke lands 3px right of the node/tether
+     centreline instead of on it. */
+  translate: -50% 0;
+  color: var(--line-strong);
+  pointer-events: none;
+}
+
+.timeline__entry {
+  position: relative;
+  padding-left: calc(var(--spacing) * 5);
+}
+
+/* The node is a registration cross, not a dot — the system already marks a
+   position that way (§3.4), and a circle would be the only one on the site. */
+.timeline__node {
+  position: absolute;
+  top: calc(var(--spacing) * 2);
+  left: calc(var(--spacing) * 1.5);
+  width: 11px;
+  height: 11px;
+  translate: -50% 0;
+  pointer-events: none;
+  background-color: var(--surface);
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--mark), var(--mark)), linear-gradient(var(--mark), var(--mark));
+  background-size:
+    11px 1px,
+    1px 11px;
+  background-position: center, center;
+}
+
+/* The tether — a horizontal tick from the card edge to the spine. */
+.timeline__entry::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--spacing) * 2 + 5px);
+  left: calc(var(--spacing) * 1.5);
+  width: calc(var(--spacing) * 3.5);
+  height: 1px;
+  background-color: var(--line-strong);
+}
+
+@media (min-width: 1024px) {
+  .timeline {
+    grid-template-columns: 1fr 1fr;
+    column-gap: calc(var(--spacing) * 6);
+  }
+
+  .timeline__spine {
+    left: 50%;
+    translate: -50% 0;
+  }
+
+  .timeline__entry {
+    padding-left: 0;
+  }
+
+  .timeline__entry[data-side='left'] {
+    grid-column: 1;
+    text-align: right;
+  }
+
+  /* text-align doesn't reach flex children — the org/chip row is a flex
+     row positioned by justify-content, so it needs its own rule. */
+  .timeline__entry[data-side='left'] .timeline__head {
+    justify-content: flex-end;
+  }
+
+  .timeline__entry[data-side='right'] {
+    grid-column: 2;
+  }
+
+  /* Half the column gap puts both the node and the tether's far end exactly
+     on the spine, whichever side the entry is on. */
+  .timeline__entry[data-side='left'] .timeline__node {
+    left: auto;
+    right: calc(var(--spacing) * -3);
+    translate: 50% 0;
+  }
+
+  .timeline__entry[data-side='right'] .timeline__node {
+    left: calc(var(--spacing) * -3);
+  }
+
+  .timeline__entry[data-side='left']::after {
+    left: auto;
+    right: calc(var(--spacing) * -3);
+    width: calc(var(--spacing) * 3);
+  }
+
+  .timeline__entry[data-side='right']::after {
+    left: calc(var(--spacing) * -3);
+    width: calc(var(--spacing) * 3);
+  }
+}
