@@ -4,7 +4,6 @@ import type {
   ExperienceEntry,
   Language,
   Note,
-  Score,
   Social,
   StackItem,
 } from './types.js';
@@ -51,17 +50,6 @@ export const socials: Social[] = [
   },
   { label: 'Instagram', handle: '@mirzakhalov03', url: 'https://instagram.com/mirzakhalov03' },
   { label: 'Email', handle: 'javohirmirzakhalov@gmail.com', url: 'mailto:javohirmirzakhalov@gmail.com' },
-];
-
-/**
- * Each score carries its own scale, because the design draws these as measured
- * dimensions rather than trophies (§3.6). 1330 means nothing without 400–1600
- * next to it — and showing the scale is both more honest and more interesting.
- */
-export const scores: Score[] = [
-  { label: 'SAT', value: 1330, scaleMin: 400, scaleMax: 1600, display: '1330' },
-  { label: 'IELTS', value: 8, scaleMin: 0, scaleMax: 9, display: '8.0' },
-  { label: 'GPA', value: 4, scaleMin: 0, scaleMax: 4, display: '4.00' },
 ];
 
 export const languages: Language[] = [

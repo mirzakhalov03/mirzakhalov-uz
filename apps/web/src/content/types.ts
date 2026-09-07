@@ -33,13 +33,6 @@ export type Note = {
 };
 
 export type Social = { label: string; handle: string; url: string };
-export type Score = {
-  label: string;
-  value: number;
-  scaleMin: number;
-  scaleMax: number;
-  display: string;
-};
 export type Language = { name: string; level: string; note?: string };
 export type StackItem = { name: string; frequency: 'daily' | 'often' };
 

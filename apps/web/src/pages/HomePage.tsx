@@ -1,17 +1,15 @@
 import { Suspense, lazy } from 'react';
 import { Link } from 'react-router';
-import { Data, Page, Prose, Section } from '../primitives/index.js';
+import { Data, Page, Section } from '../primitives/index.js';
 import { Button } from '../components/ui/Button.js';
 import { Footer } from '../components/chrome/Footer.js';
-import { DimensionRow } from '../components/content/DimensionRow.js';
-import { LanguageTable } from '../components/content/LanguageTable.js';
+import { AboutSection } from '../components/content/about/AboutSection.js';
 import { NoteRow } from '../components/content/NoteRow.js';
 import { Portrait } from '../components/content/Portrait.js';
 import { Skeleton } from '../components/ui/Skeleton.js';
-import { StackComb, StackCombHeader } from '../components/content/StackComb.js';
 import { WorkPlate } from '../components/content/WorkPlate.js';
 import { featuredProjects, projects } from '../content/projects.js';
-import { languages, notes, profile, scores, stack } from '../content/profile.js';
+import { notes, profile } from '../content/profile.js';
 
 /**
  * The contact form is the only thing on the page that imports Zod, and it sits
@@ -75,48 +73,15 @@ export function HomePage() {
           The face and the name, then the person behind them. It lands directly
           on the hero, and it is the one section that turns the ground over: the
           sheet is bone the whole way down, so the band is what marks the person
-          out from the work that follows. The bio keeps its bone plate inside it
-          — several hundred words on near-black is worse, not braver (§2
-          principle 7) — which lands the reading island the composition is built
-          around. */}
+          out from the work that follows.
+
+          Three chapters, all rendered, navigated by one anchored rail. The
+          panel is deliberately several viewports tall — useStack pins a tall
+          panel at `viewport - height`, so it scrolls until its last line rests
+          on the floor and only then holds, and the nav's nested sticky leaves
+          with it. */}
       <Section id="about" index="01" title="About" surface="void">
-        <div className="grid gap-6 lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-8">
-          <Prose className="border border-line p-3 lg:p-4">
-            {profile.bio.en.map((paragraph) => (
-              <p key={paragraph.slice(0, 24)}>{paragraph}</p>
-            ))}
-          </Prose>
-
-          <div className="flex flex-col gap-5">
-            <div>
-              <Data tone="accent">Measured</Data>
-              <div className="mt-1 divide-y divide-line">
-                {scores.map((score) => (
-                  <DimensionRow key={score.label} score={score} />
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <Data tone="accent">Languages</Data>
-              <div className="mt-2">
-                <LanguageTable languages={languages} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* The stack is a different kind of claim from the bio — a list of
-            tools, not a story — so it takes its own division inside the band
-            rather than trailing off the end of the paragraph: a rule at the
-            strong weight, a title line of its own, and the comb on its own air
-            below it. */}
-        <div className="mt-8 border-t border-line-strong pt-5 lg:mt-10 lg:pt-6">
-          <StackCombHeader items={stack} />
-          <div className="mt-6 lg:mt-8">
-            <StackComb items={stack} />
-          </div>
-        </div>
+        <AboutSection />
       </Section>
 
       {/* ── 02 · Projects ───────────────────────────────────────────────────
