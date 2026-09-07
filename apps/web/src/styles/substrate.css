@@ -911,3 +911,108 @@
     transition: none;
   }
 }
+
+/* --- the experience timeline ---------------------------------------------
+   A spine with entries hung off it. Down the left edge on a phone, because a
+   single column has no middle to alternate about; centred from lg, where
+   alternating is what makes a list of four jobs read as a passage of time
+   rather than as four more cards. */
+
+.timeline {
+  position: relative;
+  display: grid;
+  gap: calc(var(--spacing) * 3);
+}
+
+.timeline__spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--spacing) * 1.5);
+  color: var(--line-strong);
+  pointer-events: none;
+}
+
+.timeline__entry {
+  position: relative;
+  padding-left: calc(var(--spacing) * 5);
+}
+
+/* The node is a registration cross, not a dot — the system already marks a
+   position that way (§3.4), and a circle would be the only one on the site. */
+.timeline__node {
+  position: absolute;
+  top: calc(var(--spacing) * 2);
+  left: calc(var(--spacing) * 1.5);
+  width: 11px;
+  height: 11px;
+  translate: -50% 0;
+  pointer-events: none;
+  background-color: var(--surface);
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--mark), var(--mark)), linear-gradient(var(--mark), var(--mark));
+  background-size:
+    11px 1px,
+    1px 11px;
+  background-position: center, center;
+}
+
+/* The tether — a horizontal tick from the card edge to the spine. */
+.timeline__entry::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--spacing) * 2 + 5px);
+  left: calc(var(--spacing) * 1.5);
+  width: calc(var(--spacing) * 3.5);
+  height: 1px;
+  background-color: var(--line-strong);
+}
+
+@media (min-width: 1024px) {
+  .timeline {
+    grid-template-columns: 1fr 1fr;
+    column-gap: calc(var(--spacing) * 6);
+  }
+
+  .timeline__spine {
+    left: 50%;
+    translate: -50% 0;
+  }
+
+  .timeline__entry {
+    padding-left: 0;
+  }
+
+  .timeline__entry[data-side='left'] {
+    grid-column: 1;
+    text-align: right;
+  }
+
+  .timeline__entry[data-side='right'] {
+    grid-column: 2;
+  }
+
+  /* Half the column gap puts both the node and the tether's far end exactly
+     on the spine, whichever side the entry is on. */
+  .timeline__entry[data-side='left'] .timeline__node {
+    left: auto;
+    right: calc(var(--spacing) * -3);
+    translate: 50% 0;
+  }
+
+  .timeline__entry[data-side='right'] .timeline__node {
+    left: calc(var(--spacing) * -3);
+  }
+
+  .timeline__entry[data-side='left']::after {
+    left: auto;
+    right: calc(var(--spacing) * -3);
+    width: calc(var(--spacing) * 3);
+  }
+
+  .timeline__entry[data-side='right']::after {
+    left: calc(var(--spacing) * -3);
+    width: calc(var(--spacing) * 3);
+  }
+}
