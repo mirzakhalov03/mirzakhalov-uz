@@ -1,4 +1,13 @@
-import type { Language, Note, Score, Social, StackItem } from './types.js';
+import type {
+  Certificate,
+  EducationEntry,
+  ExperienceEntry,
+  Language,
+  Note,
+  Score,
+  Social,
+  StackItem,
+} from './types.js';
 
 export const profile = {
   name: 'Javohirbek Mirzakhalov',
@@ -81,9 +90,87 @@ export const stack: StackItem[] = [
   { name: 'Ant Design', frequency: 'often' },
 ];
 
-export const experience = [
-  { org: 'Ziyokor Education', role: 'IELTS mentor & ESL teacher', from: '2023', to: '2024' },
-  { org: 'LangApex Edu-Center', role: 'ESL teacher', from: '2022', to: '2023' },
+export const education: EducationEntry[] = [
+  {
+    org: 'INHA University in Tashkent',
+    qualification: 'BSc, Computer Science',
+    from: '2024',
+    to: '2028',
+    detail: 'Computer science on INHA’s Korean curriculum, taught in English.',
+    lead: true,
+  },
+  {
+    org: "Najot Ta'lim",
+    qualification: 'Frontend development',
+    from: '2024-01',
+    to: '2024-09',
+    detail:
+      'Nine months of frontend, full time — JavaScript through to React, and the first place I shipped something somebody else had to maintain.',
+  },
+  /* The other half of this is in `experience`: three years as a student here,
+     then a year teaching in the same building. */
+  {
+    org: 'LangApex Edu-Center',
+    qualification: 'English',
+    from: '2019',
+    to: '2022',
+    detail: 'Three years of English here as a student, which is how I ended up teaching in it.',
+  },
+];
+
+/**
+ * A certificate carrying a `score` is drawn as a dimension row against its
+ * scale; one without is drawn as a card.
+ */
+export const certificates: Certificate[] = [
+  {
+    name: 'IELTS',
+    issuer: 'IDP',
+    score: { value: 8, scaleMin: 0, scaleMax: 9, display: '8.0' },
+  },
+  {
+    name: 'SAT',
+    issuer: 'College Board',
+    score: { value: 1330, scaleMin: 400, scaleMax: 1600, display: '1330' },
+  },
+  {
+    name: 'GPA',
+    score: { value: 4, scaleMin: 0, scaleMax: 4, display: '4.00' },
+  },
+  { name: 'Node.js Mastery', issuer: 'Udemy' },
+  { name: 'Certified Claude Architect', issuer: 'Anthropic' },
+];
+
+/** Reverse chronological — the timeline reads newest at the top. */
+export const experience: ExperienceEntry[] = [
+  {
+    org: 'Vention',
+    role: 'Software Engineer',
+    from: '2026-03',
+    to: null,
+    detail: 'Building product interfaces in React and TypeScript.',
+  },
+  {
+    org: 'SATashkent',
+    role: 'Frontend Engineer',
+    from: '2025-11',
+    to: '2026-03',
+    detail: 'Frontend for the platform students use to prepare for the SAT.',
+  },
+  {
+    org: 'Ziyokor Education',
+    role: 'IELTS mentor & ESL teacher',
+    from: '2023',
+    to: '2024',
+    detail: 'IELTS preparation and general English, mostly with teenagers sitting the exam that year.',
+  },
+  {
+    org: 'LangApex Edu-Center',
+    role: 'ESL teacher',
+    from: '2022',
+    to: '2023',
+    detail: 'General English, in the classes I had been sitting in three years earlier.',
+  },
 ];
 
 /** Preview rows for the writing section. Uzbek uses U+02BB throughout. */
