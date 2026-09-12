@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { InkRule } from '../../ui/InkRule.js';
 
 type AboutChapterProps = {
-  /** Also the scroll target and the id useActiveSection observes. */
+  /** Matches the tab's `aria-controls`, and is still the anchor a pasted
+   *  `#about-education` arrives on. */
   id: string;
   title: string;
   /** Gives this chapter's rule its own wobble. */
@@ -11,24 +12,36 @@ type AboutChapterProps = {
 };
 
 /**
- * One chapter of the About narrative.
+ * One chapter of the About narrative, and the panel of one tab.
  *
- * The id sits on the section rather than on the heading, so the observer
- * watches a whole chapter instead of a 30px line of text — otherwise the nav
- * would only light while the title itself was in the reading band.
+ * Labelled by its tab rather than by its own heading, which is what the tab
+ * pattern expects — the heading stays because the tab bar is a control strip,
+ * not a title, and a chapter that scrolls under it should still say what it is.
  *
- * scroll-mt clears the top bar plus, below lg, the sticky chapter bar. It is
- * belt-and-braces: scrollToFlow already subtracts the same offset, but a native
- * anchor jump (a pasted #about-education URL) does not go through it.
+ * tabIndex is unconditional. A tabpanel needs a tab stop when it holds nothing
+ * focusable, and Story holds only prose — deciding per chapter would mean the
+ * keyboard's map of the section changed depending on which tab was open.
  *
- * scroll-mt-15 (120px) below lg: --bar-h 57px + the mobile nav bar's own
- * height (16px line-box + 12px padding-block + 2px transparent border =
- * 30px, plus 24px padding-block and its 1px bottom rule = 55px) = 112px,
- * rounded up to the nearest step.
+ * scroll-mt clears the top bar, the section's sticky title, and below lg the
+ * sticky tab bar as well. It is belt-and-braces: AboutSection parks every turn
+ * with the same clearance, measured, but a native anchor jump does not go
+ * through it.
+ *
+ * Below lg (184px): --bar-h 57 + the sticky title (one line of --text-h2 at its
+ * clamp floor, 28px, plus 24px padding and a rule = 53) + the tab bar (a 48px
+ * tab plus 24px padding-block and its rule = 73) = 183, rounded up to the step.
+ * Above lg (136px): 57 + the title at its clamp ceiling (45 + 25 = 70) = 127,
+ * and the tab rail is beside the content rather than over it.
  */
 export function AboutChapter({ id, title, seed = 0, children }: AboutChapterProps) {
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-15 lg:scroll-mt-11">
+    <section
+      id={id}
+      role="tabpanel"
+      aria-labelledby={`${id}-tab`}
+      tabIndex={0}
+      className="about-chapter scroll-mt-23 lg:scroll-mt-17"
+    >
       <div className="flex items-center gap-2">
         <h3 id={`${id}-title`} className="t-chapter shrink-0 text-fg">
           {title}

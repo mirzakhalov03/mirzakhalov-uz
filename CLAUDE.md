@@ -178,11 +178,53 @@ come before `/posts/:slug`, or they 404 as "post not found".
   `ApiRequestError` carrying `status`, `code` and `fields`. `auth: true` opts a
   request into sending the admin cookie; public reads stay credential-free so
   they remain cacheable.
-- **`/#about` is one panel of three chapters, not a tab widget.** All three are
-  always rendered; `useActiveSection` derives which is current and
-  `lib/scroll-to-flow.ts` handles clicks, because `scrollIntoView` silently does
-  nothing once a stack panel has pinned. Keep the height tab-independent — if a
-  chapter ever shows and hides, `useStack` re-measures every panel below it.
+- **`/#about` is a tab widget turned by scrolling.** One chapter is mounted at a
+  time, keyed on the active tab, so the reader can never see the tail of one
+  chapter and the head of the next. `AboutSection` owns the state; `AboutNav` is
+  a `role="tablist"` with roving tabindex and the sliding rail marker;
+  `AboutChapter` is the `tabpanel`; `AboutTurn` is the runway between two
+  chapters.
+  - **A chapter is not pinned to one screen.** Experience is ~1.5 viewports on
+    a desktop and nearer 3 on a phone, so chapters keep their natural height and
+    scroll normally. The turn happens on the runway past the end: an
+    `IntersectionObserver` at `threshold: 1` on the `AboutTurn` block (never a
+    scroll listener — §7.3), which then parks the new chapter at its top going
+    forward, or at its bottom coming back.
+  - **The reposition is hidden inside a cross-fade, never eased.** A scroll the
+    reader can see is a snap however slowly it runs, so the column fades to
+    opacity 0 (`LEAVE_MS`), the page is parked behind the blank, and the new
+    chapter fades in from the direction of travel (`--turn-dir`). The commit
+    rides `transitionend`, not a timer — the effect that would start the timer
+    runs after paint, so it can beat the transition it is timing by a frame, and
+    one frame early is exactly the jump being hidden. The timer is the fallback.
+  - Parking happens in a `useLayoutEffect`, before paint, using `flowTopOf` —
+    the panel's `data-flow-top` does not move when About's own height changes,
+    only the panels below it do, so the measurement is valid either side of the
+    swap and the panels that shift are off-screen while they do it.
+  - **The turn's own scroll looks like a gesture to the observer.** `parked`
+    holds where and when the page was last put somewhere — including arrival —
+    and a turn needs both `SETTLE_MS` and `SETTLE_PX` of the reader's own
+    movement past it. Arrival counts because on a viewport tall enough to hold a
+    short chapter and its runway at once, the observer's first callback would
+    otherwise turn the page on load. Where that geometry holds, scrolling does
+    not turn the section at all and the tabs are the way through — which is
+    honest: nothing inside a panel shorter than the screen moves anyway.
+  - Selected state is `background: var(--accent-text); color: var(--surface)`.
+    `--accent-text` is by definition this ground's accent at text contrast
+    against `--surface`, so inverting the pair is contrast-correct on bone and
+    void alike. `--accent` as a fill lands at 4.1:1 and is not.
+  - Info boxes inside the band are `<Plate surface="bone">`. On void,
+    `--surface-raised` is one step off the ground — it separates, but it does
+    not make anything readable.
+- **`Section` takes `stickyHead`** (About is the only user). It pins the title
+  and its index under the top bar and publishes `--section-head-h`, which
+  `.about-nav` adds to its own sticky offset so the tab bar lands under the
+  title instead of behind it. That figure is **computed, not measured**
+  (`calc(var(--text-h2) * 1.02 + var(--spacing) * 3)`) so nothing has to read
+  layout on a scroll frame — which is why the prop only suits a head that stays
+  one line: give a `stickyHead` section a lede, or an aside that wraps, and the
+  number silently stops being true. `AboutSection.stuckHeight()` takes the real
+  `offsetHeight` instead, because it runs once per turn and can afford to.
 - **`/admin/*` is `React.lazy`-loaded** in `routes/router.tsx` so the admin bundle
   never reaches a public visitor.
 - **Relative imports carry a `.js` extension**, including from `.tsx` files

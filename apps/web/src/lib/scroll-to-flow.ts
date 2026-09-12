@@ -26,20 +26,35 @@ function offsetWithin(node: HTMLElement, ancestor: HTMLElement): number {
   return total;
 }
 
-export function scrollToFlow(target: HTMLElement, offset = 0): void {
+/**
+ * Where `target` sits in the document flow, in page coordinates.
+ *
+ * Split out from the scroll below because a caller that wants to park an
+ * element's *bottom* on the viewport floor needs the number, not the scroll —
+ * and re-deriving it from a client rect is exactly the trap this file exists
+ * to avoid.
+ */
+export function flowTopOf(target: HTMLElement): number {
   /* `.stack > *` is position: sticky and therefore positioned, so it is also
      the offsetParent the walk above terminates on. */
   const panel = target.closest<HTMLElement>('.stack > *');
   const flowTop = panel ? Number(panel.dataset.flowTop) : Number.NaN;
 
-  const top =
-    panel && Number.isFinite(flowTop)
-      ? flowTop + offsetWithin(target, panel)
-      : /* Unstacked page, or useStack has not measured yet. */
-        target.getBoundingClientRect().top + window.scrollY;
+  return panel && Number.isFinite(flowTop)
+    ? flowTop + offsetWithin(target, panel)
+    : /* Unstacked page, or useStack has not measured yet. */
+      target.getBoundingClientRect().top + window.scrollY;
+}
 
+export function scrollToFlow(
+  target: HTMLElement,
+  offset = 0,
+  /** 'auto' for a control that repositions the page, 'smooth' for a link the
+   *  reader asked to travel along. */
+  behavior: ScrollBehavior = 'smooth',
+): void {
   window.scrollTo({
-    top: Math.max(0, top - offset),
-    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    top: Math.max(0, flowTopOf(target) - offset),
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : behavior,
   });
 }

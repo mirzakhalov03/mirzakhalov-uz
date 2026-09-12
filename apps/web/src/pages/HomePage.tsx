@@ -75,12 +75,14 @@ export function HomePage() {
           sheet is bone the whole way down, so the band is what marks the person
           out from the work that follows.
 
-          Three chapters, all rendered, navigated by one anchored rail. The
-          panel is deliberately several viewports tall — useStack pins a tall
-          panel at `viewport - height`, so it scrolls until its last line rests
-          on the floor and only then holds, and the nav's nested sticky leaves
-          with it. */}
-      <Section id="about" index="01" title="About" surface="void">
+          Three chapters behind one tab rail, one mounted at a time, turned by
+          scrolling past the end of the open one. The panel's height is
+          therefore the open chapter's — about a viewport for Story, several for
+          Experience — which useStack handles either way: it pins a tall panel
+          at `viewport - height` so it scrolls until its last line rests on the
+          floor and only then holds. That last line is the turn's runway, so the
+          section holds still and turns the page rather than sliding away. */}
+      <Section id="about" index="01" title="About" surface="void" stickyHead>
         <AboutSection />
       </Section>
 

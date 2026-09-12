@@ -15,6 +15,16 @@ type SectionProps = {
    *  behind it and re-points every semantic token for the subtree, so the
    *  content inside needs no changes at all. Omit to sit on the sheet. */
   surface?: 'bone' | 'void';
+  /** Keep the title (and its index) under the top bar for the whole section.
+   *
+   *  For a section the reader stays inside rather than passes through — one
+   *  that is several screens long and changes what it is showing while they are
+   *  in it, so the title is the answer to "where am I" rather than a label they
+   *  read once. It also publishes `--section-head-h` for anything below that has
+   *  to stick clear of it, and that number is computed rather than measured, so
+   *  the head has to stay one line of `--text-h2`: add a lede or an aside that
+   *  wraps and it stops being true. */
+  stickyHead?: boolean;
   children: ReactNode;
 };
 
@@ -23,7 +33,16 @@ type SectionProps = {
  * its section is in view — the drawing-margin equivalent of a scroll position
  * indicator, and the reason the design doesn't need a progress dot column.
  */
-export function Section({ id, index, title, lede, aside, surface, children }: SectionProps) {
+export function Section({
+  id,
+  index,
+  title,
+  lede,
+  aside,
+  surface,
+  stickyHead,
+  children,
+}: SectionProps) {
   const band = surface === 'void';
 
   return (
@@ -31,6 +50,7 @@ export function Section({ id, index, title, lede, aside, surface, children }: Se
       id={id}
       data-section={id}
       data-surface={surface}
+      data-sticky-head={stickyHead || undefined}
       className={[
         'scroll-mt-11',
         /* A band is separated by the change of ground, so it does not also take
@@ -40,7 +60,15 @@ export function Section({ id, index, title, lede, aside, surface, children }: Se
       ].join(' ')}
     >
       <div className="lg:grid lg:grid-cols-[88px_1fr] lg:gap-6">
-        <div className="lg:sticky lg:top-11 lg:self-start lg:pt-1">
+        {/* The index rides with the title when the title stays, so the two do
+            not drift apart on the way down the section. */}
+        <div
+          className={
+            stickyHead
+              ? 'section-head__index lg:sticky lg:self-start'
+              : 'lg:sticky lg:top-11 lg:self-start lg:pt-1'
+          }
+        >
           {index ? (
             <Data tone="accent" aria-hidden="true">
               {index}
@@ -49,7 +77,12 @@ export function Section({ id, index, title, lede, aside, surface, children }: Se
         </div>
 
         <div>
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+          <div
+            className={[
+              'flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2',
+              stickyHead ? 'section-head' : '',
+            ].join(' ')}
+          >
             <h2 className="t-h2 text-fg">{title}</h2>
             {aside}
           </div>

@@ -1,58 +1,99 @@
-import type { CSSProperties, MouseEvent } from 'react';
+import { useRef } from 'react';
+import type { CSSProperties, KeyboardEvent } from 'react';
 
-export type AboutChapterLink = { id: string; label: string };
+type AboutNavProps<Id extends string> = {
+  chapters: readonly { id: Id; label: string }[];
+  active: Id;
+  onSelect: (id: Id) => void;
+};
 
-type AboutNavProps = {
-  chapters: readonly AboutChapterLink[];
-  active: string;
-  onNavigate: (id: string) => void;
+/** Which way each key moves the selection. Both axes are accepted because the
+ *  same tablist is a horizontal bar below lg and a vertical rail above it, and
+ *  CSS — not the component — is what decides which. */
+const STEP: Record<string, number> = {
+  ArrowRight: 1,
+  ArrowDown: 1,
+  ArrowLeft: -1,
+  ArrowUp: -1,
 };
 
 /**
- * Not a tab widget. Every chapter is in the DOM and reachable by scrolling, so
- * role="tab" would promise panels that show and hide and tell a screen-reader
- * user that two thirds of the section is unavailable. It is a table of
- * contents: real anchors, aria-current, and a click handler that only
- * preventDefaults so it can substitute the flow-aware scroll.
+ * A real tab widget, and now honestly so.
+ *
+ * This used to be a table of contents: every chapter was in the DOM and
+ * reachable by scrolling, so `role="tab"` would have promised panels that show
+ * and hide when nothing did. One chapter is mounted at a time now, which is
+ * exactly what the tab pattern describes, so the ARIA is no longer a lie —
+ * selection moves with the arrow keys, tabindex roves so the tablist is one
+ * stop rather than three, and each tab names the panel it controls.
+ *
+ * The rail keeps its sliding marker. The fill says which tab is open; the
+ * marker says the reader is travelling through an ordered set and where in it
+ * they are — which is the thing scrolling changes, so it is the thing that
+ * moves. A fixed step is what lets it move without measuring anything: index
+ * times step, and no layout read on any frame.
  */
-export function AboutNav({ chapters, active, onNavigate }: AboutNavProps) {
-  const index = chapters.findIndex((chapter) => chapter.id === active);
-  const hasCurrent = index >= 0;
+export function AboutNav<Id extends string>({ chapters, active, onSelect }: AboutNavProps<Id>) {
+  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const activeIndex = chapters.findIndex((chapter) => chapter.id === active);
 
-  const handleClick = (event: MouseEvent<HTMLAnchorElement>, id: string) => {
-    /* Let the browser handle a modified click — a new tab on a #hash is odd
-       but it is the reader's to ask for. */
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const from = activeIndex;
+    if (from < 0) return;
+
+    let to: number;
+    if (event.key === 'Home') to = 0;
+    else if (event.key === 'End') to = chapters.length - 1;
+    else {
+      const step = STEP[event.key];
+      if (step === undefined) return;
+      to = (from + step + chapters.length) % chapters.length;
+    }
+
+    const next = chapters[to];
+    if (!next) return;
+
     event.preventDefault();
-    onNavigate(id);
+    onSelect(next.id);
+    /* onSelect repositions the page to the top of the section; letting focus
+       scroll as well would fight it for the same frame. */
+    tabs.current[to]?.focus({ preventScroll: true });
   };
 
   return (
-    <nav
-      aria-label="About chapters"
-      className="about-nav"
-      data-has-current={hasCurrent || undefined}
-      style={hasCurrent ? ({ '--about-nav-index': index } as CSSProperties) : undefined}
-    >
-      <ul className="about-nav__list">
-        {chapters.map((chapter) => {
+    <div className="about-nav">
+      <div
+        role="tablist"
+        aria-label="About chapters"
+        className="about-nav__list"
+        onKeyDown={handleKeyDown}
+        style={{ '--about-nav-index': Math.max(0, activeIndex) } as CSSProperties}
+      >
+        {chapters.map((chapter, index) => {
           const current = chapter.id === active;
 
           return (
-            <li key={chapter.id}>
-              <a
-                href={`#${chapter.id}`}
-                aria-current={current ? 'true' : undefined}
-                data-current={current || undefined}
-                onClick={(event) => handleClick(event, chapter.id)}
-                className="about-nav__link t-data"
-              >
-                {chapter.label}
-              </a>
-            </li>
+            <button
+              key={chapter.id}
+              ref={(node) => {
+                tabs.current[index] = node;
+              }}
+              type="button"
+              role="tab"
+              id={`${chapter.id}-tab`}
+              aria-selected={current}
+              aria-controls={chapter.id}
+              /* Roving: only the selected tab is in the page's tab order, so
+                 Tab enters and leaves the tablist rather than walking it. */
+              tabIndex={current ? 0 : -1}
+              onClick={() => onSelect(chapter.id)}
+              className="about-nav__link"
+            >
+              {chapter.label}
+            </button>
           );
         })}
-      </ul>
-    </nav>
+      </div>
+    </div>
   );
 }

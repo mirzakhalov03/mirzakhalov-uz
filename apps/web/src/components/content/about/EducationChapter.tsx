@@ -18,7 +18,7 @@ function span(entry: EducationEntry): string {
 
 function EducationCard({ entry }: { entry: EducationEntry }) {
   return (
-    <Plate className="flex h-full flex-col gap-1 p-3">
+    <Plate surface="bone" className="flex h-full flex-col gap-1 p-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h4 className="t-h4 text-fg">{entry.org}</h4>
         <Data>{span(entry)}</Data>
@@ -67,7 +67,10 @@ export function EducationChapter() {
           <InkRule seed={5} className="text-line" />
         </div>
 
-        <div className="mt-3 grid gap-x-6 gap-y-1 sm:grid-cols-2">
+        {/* The dimension rows share one island rather than taking one each:
+            they are a set of measurements read against each other, and a card
+            per row would draw six frames around one table. */}
+        <Plate surface="bone" className="mt-3 grid gap-x-6 gap-y-1 p-3 sm:grid-cols-2">
           {measured.map((certificate) =>
             certificate.score ? (
               <DimensionRow
@@ -81,12 +84,12 @@ export function EducationChapter() {
               />
             ) : null,
           )}
-        </div>
+        </Plate>
 
         {awarded.length ? (
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {awarded.map((certificate) => (
-              <Plate key={certificate.name} className="flex flex-col gap-1 p-3">
+              <Plate key={certificate.name} surface="bone" className="flex flex-col gap-1 p-3">
                 <h5 className="t-h4 text-fg">{certificate.name}</h5>
                 {certificate.issuer ? <Data>by {certificate.issuer}</Data> : null}
               </Plate>

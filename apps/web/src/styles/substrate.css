@@ -177,6 +177,48 @@
 }
 
 /* ==========================================================================
+   A section that keeps its title (Section `stickyHead`)
+   Opt-in, because it is only right for a section the reader stays inside: one
+   several screens long that changes what it is showing while they are in it, so
+   the title answers "where am I" rather than labelling something they read
+   once. Everywhere else the title is furniture and should leave with the rest.
+   ========================================================================== */
+
+[data-sticky-head] {
+  /* What anything below has to stick clear of: one line of --text-h2 in a row
+     padded 12px top and bottom. Computed rather than measured — no observer, no
+     layout read on any frame — which is exactly why `stickyHead` documents that
+     the head stays a bare title. A lede, or an aside that wraps to a second
+     line, and this number quietly stops being true. */
+  --section-head-h: calc(var(--text-h2) * 1.02 + var(--spacing) * 3);
+}
+
+.section-head {
+  position: sticky;
+  /* Directly under the top bar, so the two read as one stacked header rather
+     than as a title floating in a gap that content shows through. */
+  top: var(--bar-h);
+  /* Above the chapter tabs, which stick below it and pass under it on the way
+     out — the tab bar carries z-index 20. */
+  z-index: 25;
+  padding-block: calc(var(--spacing) * 1.5);
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+/* The index rides with the title, or the two drift apart on the way down. The
+   pt keeps the pairing the unstuck version has — the index's small caps sitting
+   a step below the top of the title's line box. Confined to the breakpoint that
+   puts them side by side: below lg the index is a line above the head, not a
+   rail beside it, and neither offset means anything there. */
+@media (min-width: 1024px) {
+  .section-head__index {
+    top: var(--bar-h);
+    padding-top: calc(var(--spacing) * 2.5);
+  }
+}
+
+/* ==========================================================================
    Registration marks — the separation device that replaces shadow (§3.4)
    Four violet corner crosses, drawn as eight gradients on one pseudo-element,
    so a plate costs no extra DOM.
@@ -790,29 +832,60 @@
   text-transform: uppercase;
 }
 
-/* --- the chapter navigation ----------------------------------------------
-   One component, two treatments. Below lg it is a bar under the top bar;
-   from lg it is a rail beside the content. Both are plain position: sticky
-   inside the About panel, which is what makes the nav leave when the section
-   ends without a single line of unpin logic. */
+/* --- the chapter tabs -----------------------------------------------------
+   One tablist, two treatments. Below lg it is a bar under the top bar; from lg
+   it is a rail beside the content. Both are plain position: sticky inside the
+   About panel, which is what makes the tabs leave when the section ends
+   without a single line of unpin logic.
+
+   The rail keeps its sliding marker alongside the fill. They are not the same
+   statement: the fill says which chapter is open, the marker says where in an
+   ordered set of three the reader has got to — and since scrolling is what
+   moves them through it, that is the part that has to move. */
 
 .about-nav__list {
   display: flex;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: var(--spacing);
 }
 
 .about-nav__link {
   display: inline-flex;
   align-items: center;
+  font-family: var(--font-sans);
+  font-size: var(--text-h4);
+  font-weight: 600;
+  /* The label is a single uppercase line in a fixed-height box, so it is
+     centred by the box rather than by a line-height that would have to be
+     re-tuned every time the box changed. */
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
   color: var(--fg-muted);
-  text-decoration: none;
-  transition: color var(--duration-micro) var(--ease-plate);
+  background-color: transparent;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition:
+    color var(--duration-micro) var(--ease-plate),
+    background-color var(--duration-micro) var(--ease-plate),
+    border-color var(--duration-micro) var(--ease-plate);
 }
 
-.about-nav__link[data-current] {
-  color: var(--accent-text);
+.about-nav__link:hover {
+  color: var(--fg);
+  border-color: var(--line-strong);
+}
+
+/* The selected fill, and the reason it needs no new token.
+   --accent-text is defined as this ground's accent *at text contrast against
+   --surface*. Swapping the pair keeps that guarantee and inverts nothing else,
+   so one rule is correct on both grounds: violet-hot on void at 5.6:1, and
+   violet-deep on bone at 6.3:1. Reaching for --accent instead would have
+   landed at 4.1:1 — legible, but under AA for a label this size. */
+.about-nav__link[aria-selected='true'] {
+  background-color: var(--accent-text);
+  border-color: var(--accent-text);
+  color: var(--surface);
 }
 
 /* The bar. Opaque, not the top bar's translucent + blur: two stacked
@@ -820,7 +893,7 @@
 @media (max-width: 1023.98px) {
   .about-nav {
     position: sticky;
-    top: var(--bar-h);
+    top: calc(var(--bar-h) + var(--section-head-h, 0px));
     z-index: 20;
     /* Break the container gutter so the rule under the bar runs edge to edge,
        then put the gutter back on the contents. Page's gutter is px-3
@@ -841,8 +914,10 @@
     }
   }
 
+  /* Three tabs this size overrun a small phone by about a tab's worth. The
+     strip scrolls rather than shrinking the type back down, and the third tab
+     is left part-visible, which is what says it scrolls. */
   .about-nav__list {
-    gap: calc(var(--spacing) * 2);
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -852,33 +927,30 @@
   }
 
   .about-nav__link {
-    padding: calc(var(--spacing) * 0.75) calc(var(--spacing) * 1.25);
-    white-space: nowrap;
-    /* Transparent at rest so the box appearing costs no layout shift. */
-    border: 1px solid transparent;
-    transition:
-      color var(--duration-micro) var(--ease-plate),
-      border-color var(--duration-micro) var(--ease-plate);
-  }
-
-  .about-nav__link[data-current] {
-    border-color: var(--line-strong);
+    flex: 1 0 auto;
+    justify-content: center;
+    min-height: calc(var(--spacing) * 6);
+    padding-inline: calc(var(--spacing) * 1.5);
   }
 }
 
-/* The rail. A fixed step is what lets the marker move without measuring
-   anything — index times step, and no layout read on any frame. */
+/* The rail. */
 @media (min-width: 1024px) {
   .about-nav {
-    --about-nav-step: calc(var(--spacing) * 5);
+    /* The tab's box, and the pitch the marker travels on — the gap above is
+       what separates the two, so the step has to restate it or the marker
+       drifts a gap further out of true with every chapter. */
+    --about-nav-tab: calc(var(--spacing) * 6);
+    --about-nav-step: calc(var(--about-nav-tab) + var(--spacing));
     position: sticky;
-    top: calc(var(--bar-h) + var(--spacing) * 4);
+    top: calc(var(--bar-h) + var(--section-head-h, 0px) + var(--spacing) * 2);
     align-self: start;
   }
 
   .about-nav__list {
     position: relative;
     flex-direction: column;
+    align-items: stretch;
     padding-left: calc(var(--spacing) * 2);
   }
 
@@ -886,29 +958,134 @@
     content: '';
     position: absolute;
     left: 0;
-    top: calc((var(--about-nav-step) - var(--spacing) * 2) / 2);
+    top: calc((var(--about-nav-tab) - var(--spacing) * 2) / 2);
     width: 2px;
     height: calc(var(--spacing) * 2);
     background-color: var(--accent);
     translate: 0 calc(var(--about-nav-index, 0) * var(--about-nav-step));
-    transition: translate var(--duration-micro) var(--ease-plate);
-  }
-
-  /* Marker and highlight are two derivations of the same fact, so they must
-     agree: no current chapter, no marker. Without this the marker would rest
-     on the first item while no link was marked. */
-  .about-nav:not([data-has-current]) .about-nav__list::before {
-    opacity: 0;
+    /* The same clock the chapter's entrance runs on, so the marker arriving and
+       the new chapter arriving read as one movement rather than two. */
+    transition: translate calc(var(--duration-micro) * 2) var(--ease-plate);
   }
 
   .about-nav__link {
-    height: var(--about-nav-step);
+    justify-content: flex-start;
+    min-height: var(--about-nav-tab);
+    padding-inline: calc(var(--spacing) * 2);
+  }
+}
+
+/* --- the chapter panel ----------------------------------------------------
+   One panel is mounted at a time and it is keyed on the active tab, so this
+   plays on every switch. It is not §2 principle 4's forbidden case — nothing
+   animates here because it scrolled into view; it animates because the reader
+   pressed a control, and the movement is the answer to the press. */
+
+.about-chapter {
+  /* The panel is a tab stop in its own right (Story holds nothing focusable),
+     so the focus ring has to clear its content rather than sit on the text. */
+  outline-offset: 4px;
+}
+
+/* The column the chapter and its runways sit in, and the whole of the turn's
+   choreography.
+
+   The page has to be repositioned for a chapter of a different height, and a
+   reposition the reader can see is a snap however it is eased. So it happens
+   while this is at opacity 0: the content leaves in the direction of travel,
+   the page is parked behind the blank, and the new chapter arrives from the
+   side the reader came from. Nothing visible moves during the jump, so there is
+   nothing to see jump.
+
+   --about-leave is written by AboutSection, because the timeout that commits
+   the swap and this transition have to agree to the millisecond. */
+
+.about-column {
+  transition:
+    opacity var(--about-leave, 200ms) var(--ease-plate),
+    translate var(--about-leave, 200ms) var(--ease-plate);
+}
+
+.about-column[data-leaving] {
+  opacity: 0;
+  /* Away from where the reader is going: scrolling down pushes the old chapter
+     up and out, and the new one rises in behind it. */
+  translate: 0 calc(var(--turn-dir, 1) * -6px);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .about-chapter {
+    animation: about-chapter-in calc(var(--duration-micro) * 2) var(--ease-plate) both;
+  }
+}
+
+@keyframes about-chapter-in {
+  from {
+    opacity: 0;
+    translate: 0 calc(var(--turn-dir, 1) * var(--spacing) * 0.75);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-column {
+    transition: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .about-nav__list::before {
     transition: none;
+  }
+}
+
+/* --- the turn -------------------------------------------------------------
+   The runway between two chapters. Scrolling it fully into view is what opens
+   the next one, so its height is not decoration: it is how far past the end of
+   a chapter the reader has to keep going before the page turns. svh rather
+   than vh, because on a phone a URL bar sliding away must not move the
+   threshold under someone mid-gesture. */
+
+.about-turn {
+  --bob: 3px;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing) * 2);
+  height: 40svh;
+  min-height: calc(var(--spacing) * 20);
+}
+
+.about-turn[data-dir='back'] {
+  --bob: -3px;
+}
+
+.about-turn__rule {
+  flex: 1;
+  height: 1px;
+  background-color: var(--line);
+}
+
+.about-turn__label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--spacing);
+  white-space: nowrap;
+  color: var(--accent-text);
+}
+
+/* The one animation on the site that runs at rest. It is a control's affordance
+   rather than an entrance — it says the gesture is available, and it stops
+   meaning anything the moment the reader makes it. */
+@media (prefers-reduced-motion: no-preference) {
+  .about-turn__arrow {
+    display: inline-block;
+    animation: about-turn-bob 1.8s var(--ease-plate) infinite;
+  }
+}
+
+@keyframes about-turn-bob {
+  50% {
+    translate: 0 var(--bob);
   }
 }
 
