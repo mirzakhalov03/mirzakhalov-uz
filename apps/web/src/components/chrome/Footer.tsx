@@ -1,12 +1,13 @@
-import { Link } from 'react-router';
 import { Data } from '../../primitives/Data.js';
 import { SocialIcon } from '../ui/SocialIcon.js';
+import { BrandMark } from '../ui/BrandMark.js';
 import type { Social } from '../../content/types.js';
 import { profile, socials } from '../../content/profile.js';
 
 /**
  * The title block at the foot of the sheet: who drew it, how to reach them,
- * where else they are. Drawn as one bordered block with hairline cell walls —
+ * where else they are. It is the one place the channels are listed — the
+ * contact section above it is the form alone, so they are not said twice. Drawn as one bordered block with hairline cell walls —
  * the same construction as a drawing's title block, and the same device the
  * plates on the page use, so the footer reads as part of the drawing rather
  * than as chrome bolted underneath it.
@@ -19,12 +20,6 @@ const ELSEWHERE = ['GitHub', 'LinkedIn'];
 
 const pick = (labels: string[]): Social[] =>
   labels.flatMap((label) => socials.filter((social) => social.label === label));
-
-const SITE = [
-  { to: '/work', label: 'Work' },
-  { to: '/writing', label: 'Writing' },
-  { to: '/laugh', label: 'Laugh challenge' },
-];
 
 /** A cell of outbound links. `handles` shows the address underneath the name —
  *  worth the second line for a channel someone is meant to write to, noise for
@@ -75,16 +70,7 @@ export function Footer() {
       <div className="grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-[1.6fr_1.15fr_0.85fr]">
         <div className="bg-surface p-3 sm:col-span-2 lg:col-span-1">
           <div className="flex items-center gap-2">
-            {/* The one loud element down here. It carries its own ground rather
-                than a colour of its own, so the mark is the system's inversion
-                and not a sixth pigment (§3.2). */}
-            <span
-              data-surface="void"
-              aria-hidden="true"
-              className="marks grid size-8 shrink-0 place-items-center bg-surface font-display text-[1.5rem] leading-none text-fg"
-            >
-              JM
-            </span>
+            <BrandMark className="size-8 text-[1.5rem]" />
             <div className="min-w-0">
               <span className="t-h4 block text-fg">{profile.name}</span>
               <Data className="mt-0.5 block">
@@ -106,18 +92,6 @@ export function Footer() {
         <Data>
           © {new Date().getFullYear()} {profile.name} · {profile.utcOffset}
         </Data>
-
-        <nav aria-label="Rest of the site" className="flex flex-wrap gap-x-4 gap-y-1">
-          {SITE.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="transition-colors duration-[160ms] hover:text-accent-text"
-            >
-              <Data tone="fg">{item.label}</Data>
-            </Link>
-          ))}
-        </nav>
       </div>
     </footer>
   );

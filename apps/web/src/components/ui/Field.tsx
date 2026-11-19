@@ -30,7 +30,7 @@ export function Field({ id, label, error, multiline = false, className = '', ...
         aria-describedby={error ? errorId : undefined}
         /* 16px on mobile, or iOS zooms the whole page on focus. */
         className={[
-          'w-full border bg-well px-2 py-2 text-[16px] text-fg sm:text-body',
+          'w-full border bg-well px-1.5 py-1 text-[16px] text-fg sm:text-body',
           'outline-none transition-colors duration-[160ms] ease-plate',
           'placeholder:text-fg-subtle focus:border-accent-text',
           error ? 'border-danger' : 'border-line',

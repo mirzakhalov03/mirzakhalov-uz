@@ -59,6 +59,7 @@ export const portraits: Photo[] = [
     image: {
       url: '/media/portraits/roadshow-speaking.jpg',
       alt: 'Javohir speaking into a microphone on stage at the IT Community Roadshow',
+      position: 'top',
     },
   },
   {

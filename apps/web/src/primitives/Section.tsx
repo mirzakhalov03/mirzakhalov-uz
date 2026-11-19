@@ -25,7 +25,15 @@ type SectionProps = {
    *  the head has to stay one line of `--text-h2`: add a lede or an aside that
    *  wraps and it stops being true. */
   stickyHead?: boolean;
-  children: ReactNode;
+  /** Content that spans the viewport instead of the column — the home
+   *  Projects rows. Rendered below the grid, so the index, title and lede stay
+   *  on the drawing margin while this breaks out to both edges. */
+  bleed?: ReactNode;
+  /** Extra classes on the <section> — e.g. dropping the bottom padding when
+   *  the content sets its own floor. Tailwind v4 sorts `pb-*` after `py-*`,
+   *  so a side override wins. */
+  className?: string;
+  children?: ReactNode;
 };
 
 /**
@@ -41,6 +49,8 @@ export function Section({
   aside,
   surface,
   stickyHead,
+  bleed,
+  className,
   children,
 }: SectionProps) {
   const band = surface === 'void';
@@ -57,6 +67,7 @@ export function Section({
            the hairline — two separation devices for one edge (§3.4). It gets
            more air instead, because an inverted block needs room to be a block. */
         band ? 'band py-10 lg:py-16' : 'border-t border-line py-8 lg:py-12',
+        className ?? '',
       ].join(' ')}
     >
       <div className="lg:grid lg:grid-cols-[88px_1fr] lg:gap-6">
@@ -91,9 +102,11 @@ export function Section({
             <p className="prose-measure mt-3 text-lede text-fg-muted text-balance">{lede}</p>
           ) : null}
 
-          <div className="mt-6 lg:mt-8">{children}</div>
+          {children ? <div className="mt-6 lg:mt-8">{children}</div> : null}
         </div>
       </div>
+
+      {bleed ? <div className="section-bleed mt-6 lg:mt-8">{bleed}</div> : null}
     </section>
   );
 }

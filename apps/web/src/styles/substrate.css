@@ -143,6 +143,14 @@
    begins in the flow *below* the bar, so a full 100lvh runs a bar's height past
    the bottom of the screen and its centred content lands exactly that much low.
    It is the one panel whose screen is short by the bar. */
+/* A panel whose content sets its own floor (home Projects): its natural
+   height, not the screen's, so the next sheet lands right under that floor
+   instead of after half a screen of centring slack. The sheet arriving next is
+   in flow directly below it, so nothing beneath shows through. */
+.stack > .stack-fit {
+  min-height: 0;
+}
+
 .stack > :first-child {
   min-height: calc(100vh - var(--bar-h));
   min-height: calc(100lvh - var(--bar-h));
@@ -479,66 +487,6 @@
 }
 
 /* ==========================================================================
-   The signature signs (§4.7)
-   A clip-path wipe over a faint ghost of the same mark. Metaphor and mechanic
-   agree — signed, then sent — and it reuses an asset already in the repo
-   instead of showing a generic green toast.
-   ========================================================================== */
-
-.signature {
-  -webkit-mask-image: var(--signature-src);
-  mask-image: var(--signature-src);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  -webkit-mask-position: left center;
-  mask-position: left center;
-  background-color: currentColor;
-}
-
-.signature-ink {
-  clip-path: inset(0 0 0 0);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .signature-ink {
-    animation: signature-sign 800ms cubic-bezier(0.4, 0, 0.15, 1) both;
-  }
-}
-
-@keyframes signature-sign {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-/* ==========================================================================
-   Screenshot grade (§4.3)
-   Graded back at rest, full colour on hover — so the work itself is the thing
-   that lights up, while every plate stays exactly where it was.
-   ========================================================================== */
-
-.screenshot {
-  filter: grayscale(0.55);
-  transition: filter 220ms var(--ease-plate);
-}
-
-.group:hover .screenshot,
-.group:focus-visible .screenshot {
-  filter: grayscale(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .screenshot {
-    filter: none;
-  }
-}
-
-/* ==========================================================================
    The stack comb (§3.5)
    The tools drawn as a honeycomb: one pointy-top hexagon per tool, tessellated
    on a three-quarter row pitch with alternate rows offset by half a cell.
@@ -552,14 +500,19 @@
    ========================================================================== */
 
 .comb {
-  --comb-cell: 80px;
+  /* Three across from the smallest phone up — two across stacked twelve tools
+     six rows deep. The cell is sized off the wrapper's width (a container, see
+     ExperienceChapter) so three always fit: the comb spans 3.5 cells plus 2.5
+     gaps, offset rows included. Capped at 84px, where the breakpoints take
+     over with fixed sizes. */
+  --comb-cell: min(84px, calc((100cqi - 15px) / 3.5));
   --comb-gap: 6px;
   --comb-step: calc(var(--comb-cell) + var(--comb-gap));
   --comb-height: calc(var(--comb-cell) * 1.1547);
   --comb-row: calc(var(--comb-height) * 0.75 + var(--comb-gap));
 
   display: grid;
-  grid-template-columns: repeat(2, var(--comb-cell));
+  grid-template-columns: repeat(3, var(--comb-cell));
   grid-auto-rows: var(--comb-row);
   justify-content: center;
   /* Half a cell of side room for the offset rows, and the last row's point. */
@@ -654,26 +607,10 @@
   translate: calc(var(--comb-step) / -4);
 }
 
-.comb > :nth-child(4n + 3),
-.comb > :nth-child(4n + 4) {
+.comb > :nth-child(6n + 4),
+.comb > :nth-child(6n + 5),
+.comb > :nth-child(6n + 6) {
   translate: calc(var(--comb-step) / 4);
-}
-
-@media (min-width: 400px) {
-  .comb {
-    --comb-cell: 84px;
-    grid-template-columns: repeat(3, var(--comb-cell));
-  }
-
-  .comb > :nth-child(n) {
-    translate: calc(var(--comb-step) / -4);
-  }
-
-  .comb > :nth-child(6n + 4),
-  .comb > :nth-child(6n + 5),
-  .comb > :nth-child(6n + 6) {
-    translate: calc(var(--comb-step) / 4);
-  }
 }
 
 @media (min-width: 640px) {
@@ -788,10 +725,10 @@
    The hand in the top-bar CTA
    ========================================================================== */
 
-/* Origin at the wrist, where the drawing's palm meets the arm, so the pivot
-   looks anatomical rather than like a spinning sticker. */
+/* Origin at the wrist, bottom-right of the image, so the pivot looks
+   anatomical rather than like a spinning sticker. */
 .hand-wave {
-  transform-origin: 46% 88%;
+  transform-origin: 75% 90%;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -1312,6 +1249,15 @@
   color: var(--fg);
 }
 
+/* Phones only — from `sm` the links sit in the bar itself. Hidden here, not
+   with a `sm:hidden` utility: this file is unlayered, so the `display` above
+   outranks anything in Tailwind's utilities layer and the utility never won. */
+@media (width >= 40rem) {
+  .nav-burger {
+    display: none;
+  }
+}
+
 .nav-burger__bar {
   display: block;
   width: 18px;
@@ -1368,5 +1314,377 @@
   .nav-menu__list,
   .nav-menu::backdrop {
     animation: none;
+  }
+}
+
+/* ==========================================================================
+   Folder — the home Projects card (spec 2026-11-19-projects-folders §5.1)
+   A back flap with a tab, loose cards tucked behind a front panel. Rounded and
+   shadowed on purpose: these are deliberate departures from §2 principle 6 and
+   §4.3, listed in the spec's §3 — a folder reads as a folder only when soft,
+   and the shadow is what sells the flap tipping open.
+
+   Opening is keyed off :hover and :focus-within alike, so tabbing into a
+   folder opens it the way pointing at it does. Under (hover: none) there is
+   nothing to point with, so the actions simply stay shown.
+   ========================================================================== */
+.folder {
+  position: relative;
+  display: block;
+  padding-top: 34px;
+  perspective: 1000px;
+  color: var(--fg);
+}
+
+.folder__back {
+  position: absolute;
+  inset: 16px 0 0;
+  border-radius: var(--radius-folder);
+  background: var(--folder-back);
+}
+
+.folder__tab {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  width: 44%;
+  height: 34px;
+  padding-inline: calc(var(--spacing) * 2.25);
+  border-radius: 18px 18px 0 0;
+  background: var(--folder-back);
+  /* --fg, not --accent-text: on this tint the violet lands near 3.9:1, under
+     the 4.5:1 an 11px label needs. Void clears it several times over. */
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.folder__papers {
+  position: absolute;
+  top: 0;
+  right: 22px;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+}
+
+/* A loose card, not a toolbar button: rotated and staggered at rest. */
+.folder__paper {
+  display: grid;
+  place-items: start center;
+  width: 40px;
+  height: 46px;
+  padding-top: 7px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-frame);
+  background: var(--color-paper);
+  color: var(--color-void);
+  box-shadow: 0 2px 6px -3px rgb(12 10 20 / 0.25);
+}
+
+.folder__paper > svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Initials, for a tool with no mark of its own. */
+.folder__paper > span {
+  font-family: var(--font-display);
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.folder__paper:nth-child(1) { transform: rotate(-7deg); }
+.folder__paper:nth-child(2) { transform: rotate(3deg) translateY(5px); }
+.folder__paper:nth-child(3) { transform: rotate(-2deg) translateY(1px); }
+.folder__paper:nth-child(4) { transform: rotate(6deg) translateY(4px); }
+.folder__paper:nth-child(5) { transform: rotate(-4deg) translateY(2px); }
+
+/* A phone-width folder (~300px) has room for four cards beside the tab; a
+   fifth would sit on top of the tab's text. */
+@media (width < 30rem) {
+  .folder__paper:nth-child(n + 5) {
+    display: none;
+  }
+}
+
+.folder__front {
+  position: relative;
+  z-index: 2;
+  margin-top: 6px;
+  padding: calc(var(--spacing) * 2.25);
+  border-radius: var(--radius-folder);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-folder);
+  transform-origin: bottom center;
+}
+
+.folder__cover {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  /* clip, not hidden — a hidden box can still be scrolled by focus, and
+     tabbing to an action that is still slid down would nudge the cover. */
+  overflow: clip;
+  border-radius: var(--radius-folder-inner);
+  background: var(--surface-well);
+}
+
+.folder__cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.folder__actions {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing);
+  padding: calc(var(--spacing) * 2);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Open — pointer devices. Shown state first, motion layered on below. */
+@media (hover: hover) {
+  .folder:is(:hover, :focus-within) .folder__actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .folder:is(:hover, :focus-within) .folder__cover img {
+    filter: brightness(0.5);
+  }
+}
+
+/* Touch — no hover to open with, so the actions are always there. */
+@media (hover: none) {
+  .folder__actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .folder__front,
+  .folder__papers,
+  .folder__paper {
+    transition:
+      transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .folder__cover img {
+    transition: filter 300ms;
+  }
+
+  .folder__actions {
+    transform: translateY(100%);
+    transition:
+      transform 350ms cubic-bezier(0.2, 0.8, 0.2, 1) 50ms,
+      opacity 250ms 50ms;
+  }
+
+  .folder:is(:hover, :focus-within) .folder__front {
+    transform: rotateX(-10deg);
+    box-shadow: var(--shadow-folder-open);
+  }
+
+  .folder:is(:hover, :focus-within) .folder__papers {
+    transform: translateY(-14px);
+  }
+
+  .folder:is(:hover, :focus-within) .folder__paper:nth-child(1) {
+    transform: rotate(-12deg) translateX(-4px);
+  }
+
+  .folder:is(:hover, :focus-within) .folder__paper:nth-child(5) {
+    transform: rotate(9deg) translateX(4px);
+  }
+
+  .folder:is(:hover, :focus-within) .folder__actions {
+    transform: none;
+  }
+}
+
+/* The folder title: the heading face, capped so a two-word name still fits a
+   360px folder on one line — --text-h2 alone reaches 44px on a wide screen. */
+.folder__title {
+  font-size: min(var(--text-h2), 1.875rem);
+}
+
+/* ==========================================================================
+   Section bleed — content that spans the viewport, not the column
+   Same technique as .band::before: one viewport wide, centred on the section.
+   html carries overflow-x: clip, so the scrollbar's width that 100vw
+   overshoots by is swallowed instead of scrolled.
+   ========================================================================== */
+.section-bleed {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  translate: -50% 0;
+}
+
+/* ==========================================================================
+   Marquee — the home Projects row (spec 2026-11-19-projects-folders §6)
+   A native horizontal scroller: swipe, trackpad and wheel are the browser's.
+   The track holds the list three times and useMarquee keeps the reader in the
+   middle copy, so it is endless both ways; the same hook adds the slow drift
+   on wider screens. Continuous motion is a deliberate departure from §2
+   principle 4 (spec §3); reduced motion and phones get no drift.
+
+   The mask leaves a clear band about two folders wide (none on a phone) and
+   fades everything outside it, so folders arrive and leave through the fade.
+   ========================================================================== */
+.marquee {
+  --item-w: min(80vw, 320px);
+  --gap: calc(var(--spacing) * 4);
+  --focus-w: var(--item-w);
+
+  overflow-x: auto;
+  overscroll-behavior-x: contain; /* a sideways swipe at the end is not "back" */
+  scrollbar-width: none;
+  /* Focus and snapping land a folder in the clear band, not at the edge. */
+  scroll-padding-inline: calc(50% - var(--item-w) / 2);
+  /* Air for what a folder does when it opens: papers lift 14px, the flap's
+     shadow grows. Without it the row's own overflow would cut both off. */
+  padding-block: calc(var(--spacing) * 3);
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black calc(50% - var(--focus-w) / 2),
+    black calc(50% + var(--focus-w) / 2),
+    transparent 100%
+  );
+}
+
+.marquee::-webkit-scrollbar {
+  display: none;
+}
+
+@media (width >= 64rem) {
+  .marquee {
+    --focus-w: calc(var(--item-w) * 2 + var(--gap));
+  }
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+}
+
+/* The group ends with the same gap it has between items, so the seam between
+   two copies is exactly one gap and the loop's jump is invisible. */
+.marquee__group {
+  display: flex;
+  gap: var(--gap);
+  padding-right: var(--gap);
+}
+
+.marquee__item {
+  flex: none;
+  width: var(--item-w);
+}
+
+/* Phones: no drift and no fade — a swipeable strip that snaps one folder to
+   the centre at a time, the neighbours peeking in at either edge. */
+@media (width < 40rem) {
+  .marquee {
+    scroll-snap-type: x mandatory;
+    mask-image: none;
+  }
+
+  .marquee__item {
+    scroll-snap-align: center;
+  }
+}
+
+/* ==========================================================================
+   GitHub exit — "here I am" (home Projects, MoreOnGitHub)
+   When the reader reaches the section's floor, the button fills with the
+   accent, grows a touch, wiggles once and sends out two rings. `scale` and
+   `rotate` are separate properties, so the grow and the wiggle never fight
+   over one transform — nor with the Button's own active-press `translate`.
+   Unlayered, so the filled state wins over the ghost variant's utilities.
+   ========================================================================== */
+.github-exit[data-call] .github-exit__btn {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--color-bone);
+}
+
+.github-exit[data-call] .github-exit__btn:hover {
+  background: var(--fg);
+  color: var(--surface);
+}
+
+/* The ring — drawn on a pseudo-element so it can grow past the button without
+   moving anything around it. */
+.github-exit__btn::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 2px solid var(--accent);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .github-exit__btn {
+    transition:
+      scale 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      background-color 160ms,
+      color 160ms,
+      border-color 160ms;
+  }
+
+  .github-exit[data-call] .github-exit__btn {
+    scale: 1.08;
+    animation: github-wiggle 700ms ease-in-out 250ms;
+  }
+
+  .github-exit[data-call] .github-exit__btn::after {
+    animation: github-ring 1200ms cubic-bezier(0.2, 0.8, 0.2, 1) 250ms 2;
+  }
+}
+
+@keyframes github-wiggle {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  20% {
+    rotate: -4deg;
+  }
+  40% {
+    rotate: 4deg;
+  }
+  60% {
+    rotate: -3deg;
+  }
+  80% {
+    rotate: 2deg;
+  }
+}
+
+@keyframes github-ring {
+  from {
+    opacity: 0.6;
+    scale: 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1.35;
   }
 }

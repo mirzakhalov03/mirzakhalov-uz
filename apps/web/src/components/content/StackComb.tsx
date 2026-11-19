@@ -1,5 +1,5 @@
 import { Data } from '../../primitives/Data.js';
-import { stackIcons } from './stack-icons.js';
+import { StackMark } from '../ui/StackMark.js';
 import type { StackItem } from '../../content/types.js';
 
 /**
@@ -29,32 +29,24 @@ import type { StackItem } from '../../content/types.js';
 export function StackComb({ items }: { items: StackItem[] }) {
   return (
     <ul className="comb">
-      {items.map((item) => {
-        const glyph = stackIcons[item.name];
+      {items.map((item) => (
+        <li key={item.name} className="comb__cell" data-group={item.group}>
+          {/* A brand mark keeps its own colour (see stack-icons.ts), so the
+              hover fill can sit close enough to wash it out. This hexagonal
+              plate gives every glyph a constant bone backdrop, independent
+              of the cell's own fill. A tool with no mark yet still gets a
+              cell, not a hole — StackMark falls back to initials. */}
+          <span className="comb__glyph-plate">
+            <StackMark
+              name={item.name}
+              className="comb__glyph"
+              initialClassName="comb__glyph comb__initial"
+            />
+          </span>
 
-        return (
-          <li key={item.name} className="comb__cell" data-group={item.group}>
-            {/* A brand mark keeps its own colour (see stack-icons.ts), so the
-                hover fill can sit close enough to wash it out. This hexagonal
-                plate gives every glyph a constant bone backdrop, independent
-                of the cell's own fill. */}
-            <span className="comb__glyph-plate">
-              {glyph ? (
-                <svg viewBox="0 0 24 24" className="comb__glyph" aria-hidden="true" focusable="false">
-                  <path d={glyph.d} fill={glyph.color} />
-                </svg>
-              ) : (
-                /* A tool with no mark yet still gets a cell, not a hole. */
-                <span className="comb__glyph comb__initial" aria-hidden="true">
-                  {item.name.slice(0, 2)}
-                </span>
-              )}
-            </span>
-
-            <span className="comb__name">{item.name}</span>
-          </li>
-        );
-      })}
+          <span className="comb__name">{item.name}</span>
+        </li>
+      ))}
     </ul>
   );
 }

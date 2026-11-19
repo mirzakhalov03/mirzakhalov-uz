@@ -56,6 +56,18 @@
   --color-brand-claude: #d97757;
   --color-brand-telegram: #26a5e4;
   --color-brand-linkedin: #0a66c2;
+  /* The project folders' stack cards (home §02) reuse the same exception. */
+  --color-brand-postgresql: #4169e1;
+  --color-brand-awslambda: #ff9900;
+  --color-brand-reactquery: #ff4154;
+  --color-brand-antdesign: #0170fe;
+  --color-brand-sqlite: #003b57;
+  --color-brand-docker: #2496ed;
+  --color-brand-mongodb: #47a248;
+
+  /* Pure white — the folders' stack cards and the white value set
+     (`theme.css`). A brand mark needs a neutral backdrop to read as itself. */
+  --color-paper: #ffffff;
 
   /* --- type -------------------------------------------------------------- */
   --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
@@ -125,13 +137,18 @@
      suit.
      `initial` still comes first and still deletes Tailwind's whole default
      radius scale — `rounded-lg`, `rounded-md` and the rest do not exist. Only
-     `rounded-pill`, `rounded-chip` and `rounded-frame` are generated, so a
-     fourth rounded corner has to be added here, on purpose, in front of this
-     comment. */
+     `rounded-pill`, `rounded-chip`, `rounded-frame` and the two folder radii
+     are generated, so another rounded corner has to be added here, on purpose,
+     in front of this comment.
+     The folder pair belongs to the home Projects folders (spec
+     2026-11-19-projects-folders §3): a folder reads as a folder only when it
+     is soft, so the outer panel and the cover inside it round off. */
   --radius-*: initial;
   --radius-chip: 12px;
   --radius-pill: 16px;
   --radius-frame: 10px;
+  --radius-folder: 22px;
+  --radius-folder-inner: 14px;
 
   /* Elevation, for the same two components and the same reason. The rest of the
      site separates with a border and never with a shadow (§3.4) — these exist
@@ -140,6 +157,10 @@
      the palette instead of greying it. */
   --shadow-soft: 0 1px 2px rgb(12 10 20 / 0.3), 0 10px 30px -16px rgb(12 10 20 / 0.55);
   --shadow-glow: 0 18px 40px -16px rgb(138 115 255 / 0.45);
+  /* The folder's front panel, at rest and with its flap tipped open — the
+     shadow is what sells the flap lifting off the back (same spec, §3). */
+  --shadow-folder: 0 10px 30px -14px rgb(12 10 20 / 0.35);
+  --shadow-folder-open: 0 22px 40px -18px rgb(12 10 20 / 0.45);
 
   --container-content: 1280px;
 

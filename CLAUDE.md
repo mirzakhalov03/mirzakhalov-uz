@@ -294,8 +294,9 @@ reads, admin CRUD, Atom feed, seeding). Projects, profile, contact and hardening
 are not built. **The status table in `README.md` is stale** — it still reads
 "M0 complete"; `apps/api/src/routes/index.ts` is the accurate map of what is wired.
 
-Public web routes for `/writing` and `/laugh` are deliberate `PendingPage`
-placeholders, not bugs.
+The public web app is the home page only (plus `/admin/*` and the 404). The
+`/work`, `/writing` and `/laugh` routes were removed on 2026-11-19; any other
+path falls through to `ErrorPage`.
 
 ## Before shipping
 

@@ -17,7 +17,7 @@ export type Project = {
   summary: Bilingual;
   /** The card line, where `summary` is the paragraph. See the shared schema. */
   tagline?: Bilingual;
-  /** Max three, one per kind — what a ProjectCard leads with. */
+  /** Max three, one per kind — what a ProjectFolder leads with. */
   highlights?: ProjectHighlight[];
   stack: string[];
   tags: ProjectTag[];
@@ -58,13 +58,18 @@ export type MediaMention = {
 
 /** One entry in the portrait grid. `featured` takes the large cell. */
 export type Photo = {
-  /** Unset renders a placeholder — filled in once a real image exists. */
-  image?: { url: string; alt: string };
+  /**
+   * Unset renders a placeholder — filled in once a real image exists.
+   * `position` is a CSS object-position for the cropped tile, for photos whose
+   * subject sits off-centre (a face near the top edge).
+   */
+  image?: { url: string; alt: string; position?: string };
   featured?: boolean;
 };
 
 export type Social = { label: string; handle: string; url: string };
-export type Language = { name: string; level: string; note?: string };
+/** `score` is the level on a 1–5 scale, drawn as the bar under the name. */
+export type Language = { name: string; level: string; score: number; note?: string };
 export type StackItem = { name: string; group: 'core' | 'ai' };
 
 /** A value against a stated scale — 1330 means nothing without 400–1600 (§3.6). */

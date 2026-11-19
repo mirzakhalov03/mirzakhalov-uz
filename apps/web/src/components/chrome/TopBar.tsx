@@ -1,8 +1,9 @@
 import { useCallback, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Data } from '../../primitives/Data.js';
+import { Emoji } from '../ui/Emoji.js';
+import { BrandMark } from '../ui/BrandMark.js';
 import { useActiveSection } from '../../lib/useActiveSection.js';
-import { WaveHand } from '../ui/WaveHand.js';
 import { BurgerButton, NavMenu } from './NavMenu.js';
 import { NAV, NAV_IDS } from './nav-items.js';
 
@@ -31,8 +32,7 @@ function BarRow({ active, showNav = true, onNavigate, menu }: BarRowProps) {
         className="shrink-0 leading-none"
         aria-label="Javohirbek Mirzakhalov — home"
       >
-        <span className="font-display text-[1.05rem] tracking-tight text-fg">JM</span>
-        <span className="t-data ml-1 hidden text-fg-subtle sm:inline">.UZ</span>
+        <BrandMark />
       </Link>
 
       {showNav ? (
@@ -83,7 +83,7 @@ function BarRow({ active, showNav = true, onNavigate, menu }: BarRowProps) {
         onClick={onNavigate}
         className="t-data ml-auto inline-flex shrink-0 items-center gap-1.5 border border-transparent bg-accent px-2 py-1 text-[var(--color-bone)] transition-colors duration-[160ms] ease-plate hover:bg-fg hover:text-surface active:translate-x-px active:translate-y-px sm:ml-0 sm:px-2.5"
       >
-        <WaveHand className="hand-wave" />
+        <Emoji name="wave" className="hand-wave -my-0.5 size-3" />
         Say Hi
       </Link>
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-type Tone = 'live' | 'accent' | 'neutral' | 'quiet' | 'solid';
+type Tone = 'live' | 'liveSolid' | 'accent' | 'neutral' | 'quiet' | 'solid';
 type Size = 'sm' | 'md';
 
 const tones: Record<Tone, string> = {
@@ -15,6 +15,10 @@ const tones: Record<Tone, string> = {
    * for its selected tab. `--accent` as a fill lands at 4.1:1 and is not.
    */
   solid: 'border-transparent bg-accent-text text-surface',
+  /** `live`, filled. Mint on every ground rather than the ground's own
+   *  `--live` — on bone that is the deep green, which reads heavy as a fill.
+   *  Void ink on mint is ~11:1, so the pair holds on bone and void alike. */
+  liveSolid: 'border-transparent bg-mint text-void',
 };
 
 const sizes: Record<Size, string> = {
@@ -34,14 +38,17 @@ const sizes: Record<Size, string> = {
 export function Chip({
   tone = 'quiet',
   size = 'sm',
+  className = '',
   children,
 }: {
   tone?: Tone;
   size?: Size;
+  /** Extra classes — e.g. `rounded-pill` where a chip sits in a folder. */
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <span className={`inline-flex items-center border ${sizes[size]} ${tones[tone]}`}>
+    <span className={`inline-flex items-center border ${sizes[size]} ${tones[tone]} ${className}`}>
       {children}
     </span>
   );

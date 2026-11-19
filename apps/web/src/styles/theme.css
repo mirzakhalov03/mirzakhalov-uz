@@ -46,6 +46,11 @@
   --mark: var(--color-violet-deep);
 
   --shade: rgb(12 10 20 / 0.42);
+
+  /* The project folders' back flap and tab. Defined once at the root: the
+     folders only ever sit on the bone sheet, and a tint of two pigments needs
+     no per-ground value. */
+  --folder-back: color-mix(in oklab, var(--color-violet) 35%, var(--color-bone));
 }
 
 /* --- the void value set — the inverted band -------------------------------
@@ -103,8 +108,8 @@
 [data-surface='white'] {
   color-scheme: light;
 
-  --surface: #ffffff;
-  --surface-raised: #ffffff;
+  --surface: var(--color-paper);
+  --surface-raised: var(--color-paper);
   --surface-well: #f9f9f9;
 
   --fg: var(--color-void);

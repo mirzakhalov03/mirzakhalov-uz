@@ -3,6 +3,8 @@ import type { Polymorphic } from '../../primitives/polymorphic.js';
 
 type ButtonOwnProps = {
   variant?: 'solid' | 'ghost';
+  /** `sm` is for actions inside a card, where 46px would out-weigh the title. */
+  size?: 'md' | 'sm';
   className?: string;
   children: ReactNode;
 };
@@ -18,14 +20,20 @@ type ButtonOwnProps = {
 export function Button<T extends ElementType = 'button'>({
   as,
   variant = 'solid',
+  size = 'md',
   className = '',
   children,
   ...rest
 }: Polymorphic<T, ButtonOwnProps>) {
   const Tag = (as ?? 'button') as ElementType;
   const base =
-    't-data-lg inline-flex min-h-[46px] items-center justify-center gap-2 border px-3 ' +
+    'inline-flex items-center justify-center gap-2 border ' +
     'transition-colors duration-[160ms] ease-plate active:translate-x-px active:translate-y-px';
+
+  const sizes = {
+    md: 't-data-lg min-h-[46px] px-3',
+    sm: 't-data min-h-[38px] px-2',
+  } as const;
 
   const variants = {
     solid:
@@ -34,7 +42,7 @@ export function Button<T extends ElementType = 'button'>({
   } as const;
 
   return (
-    <Tag className={`${base} ${variants[variant]} ${className}`} {...rest}>
+    <Tag className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...rest}>
       {children}
     </Tag>
   );

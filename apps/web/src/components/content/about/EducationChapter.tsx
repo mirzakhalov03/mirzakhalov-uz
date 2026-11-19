@@ -139,32 +139,20 @@ function CertificateIssuer({ certificate }: { certificate: Certificate }) {
 }
 
 /**
- * A certificate without a score: an image, a name, who issued it. `compact`
- * lays the image beside the text — at every width, because the card owns a
- * half row above `sm:` and the whole row below it, so the flex row gets
- * roughly the same inner width either way. It must not stack: the card's
- * height is fixed by its container, and a column in a fixed box overflows.
- * Without `compact` the image fills the card's own column and the text sits
- * under it.
+ * The lead certificate: an image, a name, who issued it. It spans two grid
+ * columns at every width. On a phone those two columns are the whole screen,
+ * so the image sits on top at a capped size and the text runs under it at
+ * full width; from `sm:` it has a half row, and the image moves beside the
+ * text. No fixed height either way — the grid row stretches it to match its
+ * neighbours, so nothing has to be tuned to stop text spilling out.
  */
-function CertificateFeature({
-  certificate,
-  compact = true,
-}: {
-  certificate: Certificate;
-  compact?: boolean;
-}) {
+function CertificateFeature({ certificate }: { certificate: Certificate }) {
   return (
-    <Plate
-      surface="bone"
-      className={
-        compact
-          ? 'flex h-full flex-row items-stretch gap-3 p-1'
-          : 'flex h-full flex-col gap-3 p-1'
-      }
-    >
-      <CertificateImage image={certificate.image} />
-      <div className={compact ? 'flex flex-col justify-center gap-1' : 'flex flex-col gap-1'}>
+    <Plate surface="bone" className="flex flex-col gap-2 p-1 sm:flex-row sm:items-center sm:gap-3">
+      <div className="mx-auto aspect-square w-full max-w-[12rem] shrink-0 sm:mx-0 sm:w-[45%] sm:max-w-none">
+        <CertificateImage image={certificate.image} />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-1 px-1 pb-1 sm:p-0 sm:pr-2">
         <h5 className="t-h4 text-fg">{certificate.name}</h5>
         <CertificateIssuer certificate={certificate} />
       </div>
@@ -173,27 +161,32 @@ function CertificateFeature({
 }
 
 /**
- * A certificate without a score or an issuer worth naming: an image and a
- * name, nothing else — the badge slot beside the stat tiles' own column.
+ * One grid cell: the certificate's image at a fixed 4:3 frame (contained, so a
+ * landscape certificate and a square badge both show whole), the name under
+ * it. The frame is what keeps a row of these even when the names wrap to
+ * different lengths.
  */
 function CertificateBadge({ certificate }: { certificate: Certificate }) {
   return (
-    <Plate surface="bone" className="flex h-full flex-col items-center gap-1 p-1 text-center">
+    <Plate surface="bone" className="flex flex-col gap-1.5 p-1">
+      <div className="aspect-[4/3] w-full">
         <CertificateImage image={certificate.image} />
-      <h5 className="t-h4 text-fg">{certificate.name}</h5>
-      {certificate.detail ? <Data tone="muted">{certificate.detail}</Data> : null}
+      </div>
+      <div className="flex flex-col items-center gap-0.5 px-1 pb-1 text-center">
+        <h5 className="t-h4 text-fg">{certificate.name}</h5>
+        <CertificateIssuer certificate={certificate} />
+        {certificate.detail ? <Data tone="muted">{certificate.detail}</Data> : null}
+      </div>
     </Plate>
   );
 }
 
 function CertificateStat({ certificate }: { certificate: Certificate }) {
   return (
-    <Plate surface="bone" className="flex h-full flex-col justify-between p-2">
-      <div className="flex flex-col gap-1">
-        <span className="text-5xl font-medium tracking-tight text-fg">
-          {certificate.score?.display}
-        </span>
-      </div>
+    <Plate surface="bone" className="flex flex-col justify-between gap-3 p-2">
+      <span className="text-5xl font-medium tracking-tight text-fg">
+        {certificate.score?.display}
+      </span>
 
       <div>
         <h5 className="t-h5 text-fg">{certificate.name}</h5>
@@ -203,13 +196,37 @@ function CertificateStat({ certificate }: { certificate: Certificate }) {
   );
 }
 
-export function EducationChapter() {
+/**
+ * Every certificate on one grid — two columns on a phone, four from `sm:` —
+ * instead of hand-sized flex rows. The lead spans two columns; the rest take
+ * one each and flow after it, so with the current five the desktop reads
+ * lead + two badges on the first row and the two scores under the lead, and a
+ * phone reads lead, then badges in a pair, then scores in a pair. One gap
+ * throughout, and rows stretch their cells, so the cards in a row always
+ * share a height.
+ */
+function CertificateGrid() {
+  const [lead, ...rest] = certificates.filter((certificate) => !certificate.score);
   const measured = certificates.filter((certificate) => certificate.score);
 
-  const [leadFeature, ...restFeatures] = certificates.filter((certificate) => !certificate.score);
-  /* Worth naming who issued it earns the wider card; a bare name is a badge. */
-  const badges = restFeatures.filter((certificate) => !certificate.issuer);
+  return (
+    <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {lead ? (
+        <div className="col-span-2 grid">
+          <CertificateFeature certificate={lead} />
+        </div>
+      ) : null}
+      {rest.map((certificate) => (
+        <CertificateBadge key={certificate.name} certificate={certificate} />
+      ))}
+      {measured.map((certificate) => (
+        <CertificateStat key={certificate.name} certificate={certificate} />
+      ))}
+    </div>
+  );
+}
 
+export function EducationChapter() {
   return (
     <AboutChapter id="about-education" title="Education">
       <div className="flex flex-col gap-3 sm:hidden">
@@ -242,41 +259,7 @@ export function EducationChapter() {
           <InkRule seed={5} className="text-line" />
         </div>
 
-        <div className="mt-3 flex flex-col gap-2">
-          {/* One row of two halves once there is room; below `sm:` the feature
-              takes the full width and the badges drop under it, still sharing
-              their row. Stacking the badges too would push the stat tiles a
-              screen down for no gain — two badges fit a phone side by side. */}
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="h-31.25 w-full sm:w-1/2">
-              {leadFeature ? <CertificateFeature certificate={leadFeature} compact /> : null}
-            </div>
-
-            <div className="h-31.25 w-full sm:w-1/2">
-              {badges.length ? (
-                <div className="grid h-full grid-cols-2 gap-3">
-                  {badges.map((certificate) => (
-                    <CertificateBadge key={certificate.name} certificate={certificate} />
-                  ))}
-                </div>
-              ) : (
-                <div />
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            {measured.length ? (
-              <div className="grid h-20 grid-cols-2 gap-2">
-                {measured.map((certificate) => (
-                  <CertificateStat key={certificate.name} certificate={certificate} />
-                ))}
-              </div>
-            ) : (
-              <div />
-            )}
-          </div>
-        </div>
+        <CertificateGrid />
       </div>
     </AboutChapter>
   );

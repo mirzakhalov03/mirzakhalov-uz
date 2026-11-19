@@ -19,6 +19,7 @@ function PortraitTile({ photo, onOpen }: { photo: Photo; onOpen: () => void }) {
           alt={photo.image.alt}
           loading="lazy"
           decoding="async"
+          style={{ objectPosition: photo.image.position }}
           className="h-full w-full object-cover"
         />
       ) : (

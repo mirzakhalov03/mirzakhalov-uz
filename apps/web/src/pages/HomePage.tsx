@@ -1,5 +1,4 @@
 import { Suspense, lazy } from 'react';
-import { Link } from 'react-router';
 import { Data, Page, Section } from '../primitives/index.js';
 import { Button } from '../components/ui/Button.js';
 import { Footer } from '../components/chrome/Footer.js';
@@ -7,11 +6,13 @@ import { AboutSection } from '../components/content/about/AboutSection.js';
 import { NoteRow } from '../components/content/NoteRow.js';
 import { Portrait } from '../components/content/Portrait.js';
 import { Skeleton } from '../components/ui/Skeleton.js';
-import { ProjectCard } from '../components/content/ProjectCard.js';
+import { ComingSoon } from '../components/ui/ComingSoon.js';
+import { SocialIcon } from '../components/ui/SocialIcon.js';
+import { ProjectMarquee } from '../components/content/ProjectMarquee.js';
 import { MoreOnGitHub } from '../components/content/MoreOnGitHub.js';
 import { MediaMentionCard } from '../components/content/MediaMentionCard.js';
 import { PortraitGrid } from '../components/content/PortraitGrid.js';
-import { featuredProjects, projects } from '../content/projects.js';
+import { featuredProjects } from '../content/projects.js';
 import { notes, profile } from '../content/profile.js';
 import { mediaMentions, portraits } from '../content/media.js';
 
@@ -62,7 +63,7 @@ export function HomePage() {
             </h1>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              <Button as={Link} to="/work">
+              <Button as="a" href="#projects">
                 See the work
               </Button>
               <Button as="a" href="#contact" variant="ghost">
@@ -92,39 +93,35 @@ export function HomePage() {
           The proof. The reader has just met the person; this is the turn to
           what they have built, and the page's one real change of subject.
 
-          Five equal cards and a sixth cell out to GitHub, three per row on
-          desktop so the six cells resolve into two even rows with nothing
-          left ragged. There is no lead plate any more: a lead says "this one
-          first", and these five are not ranked — they are one argument, and
-          an unequal grid invited the reader to read four of them as
-          also-rans.
+          The seven running in production, as folders in one row that drifts
+          right to left, with the exit to GitHub sitting still beneath it.
+          The row swipes (touch, trackpad, wheel) with arrow buttons as the
+          fallback. Hovering a folder (or focusing the row) pauses the drift
+          and opens the folder. On a phone nothing drifts: it is a strip that
+          snaps one folder to the centre per swipe.
 
-          The cards carry their own void ground on the bone sheet (ProjectCard),
-          so the showcase is the section's contribution rather than the sheet's.
-          That is also why the GitHub cell stays bone: same frame, same cell,
-          opposite ground, so it cannot be misread as a sixth project.
+          The row breaks out of the column to both viewport edges (the
+          Section's `bleed`) and fades through a band at each side, leaving
+          about two folders clear. Continuous motion, rounded folders and their
+          shadow are deliberate departures from §2 principles 4 and 6, listed
+          in docs/superpowers/specs/2026-11-19-projects-folders-design.md §3.
 
-          Two asides would be one too many, so the index link stays where it is
-          and the exit to GitHub lives in the grid. They answer different
-          questions — everything built, versus everything pushed. */}
+          The section drops its own bottom padding and its full-screen
+          min-height (`stack-fit`): MoreOnGitHub's wrapper sets the floor, so
+          the next sheet lands a fixed 160px under it at every breakpoint,
+          with no centring slack added by the panel. */}
         <Section
           id="projects"
           index="02"
-          title="Projects"
-          lede="Five running in production — an AI quiz platform, two clinics that take their own bookings, a Telegram agent, and a URL shortener."
-          aside={
-            <Link to="/work" className="group">
-              <Data tone="accent">Index — {projects.length} projects →</Data>
-            </Link>
+          title="Personal projects"
+          className="stack-fit pb-0 lg:pb-0"
+          bleed={
+            <>
+              <ProjectMarquee projects={featuredProjects} />
+              <MoreOnGitHub />
+            </>
           }
-        >
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredProjects.map((project, i) => (
-              <ProjectCard key={project.slug} project={project} index={i} />
-            ))}
-            <MoreOnGitHub />
-          </div>
-        </Section>
+        />
 
         {/* ── 03 · Media ──────────────────────────────────────────────────────
           Talks, interviews and anything written about the work rather than by
@@ -162,19 +159,38 @@ export function HomePage() {
         its own scroll, nothing pinned and nothing piling on top of Media. */}
       <Page>
         {/* ── 04 · Blog ────────────────────────────────────────────────────
-            Depth and voice — the reason to come back. */}
+            Depth and voice — the reason to come back. Locked until the notes
+            index and reading surface ship; the preview rows sit blurred
+            underneath so the section shows its shape. */}
         <Section
           id="blog"
           index="04"
           title="Blog"
-          lede="Notes on building things, teaching, and writing Uzbek properly. In two languages."
-          aside={<Data>{notes.length} notes</Data>}
+          lede="Where I'll share what I'm learning — about code, the books I read, and the values I try to live by."
+          aside={<Data>Coming soon</Data>}
         >
-          <div className="border-y border-line">
-            {notes.map((note) => (
-              <NoteRow key={note.slug} note={note} />
-            ))}
-          </div>
+          <ComingSoon
+            note="The first posts are being written. Until then, check out my Telegram blog."
+            action={
+              <Button
+                as="a"
+                href="https://t.me/jm_personalblog"
+                target="_blank"
+                rel="noopener noreferrer"
+                size="sm"
+                className="rounded-chip"
+              >
+                <SocialIcon label="Telegram" mono className="size-2" />
+                @jm_personalblog ↗
+              </Button>
+            }
+          >
+            <div className="border-y border-line">
+              {notes.map((note) => (
+                <NoteRow key={note.slug} note={note} />
+              ))}
+            </div>
+          </ComingSoon>
         </Section>
 
         {/* ── 06 · Contact, and the tail ──────────────────────────────────────
@@ -186,7 +202,7 @@ export function HomePage() {
           id="contact"
           index="06"
           title="Get in touch"
-          lede="Open to software work. Tell me what you are building."
+          lede="Open to software work — or just a conversation. A project, an idea, books, anything you want to talk about."
         >
           <Suspense fallback={<Skeleton lines={5} />}>
             <ContactSection />

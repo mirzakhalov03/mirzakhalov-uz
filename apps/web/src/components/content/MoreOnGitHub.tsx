@@ -1,45 +1,78 @@
-import { Data } from '../../primitives/Data.js';
-import { Plate } from '../../primitives/Plate.js';
+import { useEffect, useRef, useState } from 'react';
 import { socials } from '../../content/profile.js';
+import { Button } from '../ui/Button.js';
+import { SocialIcon } from '../ui/SocialIcon.js';
 
 /**
- * The sixth cell of a five-card grid — the way out of the section.
+ * The way out of the Projects section, sitting still under the moving row —
+ * and the section's floor: its wrapper's bottom padding is how far the next
+ * sheet lands below the button.
  *
- * It keeps the sheet's own ground while the five projects invert to void, which
- * is the whole of how it says "not a sixth project": same frame, same grid
- * cell, opposite ground. Nothing had to be added to make the distinction — the
- * cards' ground is what draws it.
+ * When the reader reaches that floor (the last scroll before the next section
+ * arrives), the button calls out: it fills with the accent, grows a little,
+ * gives a small wiggle and sends out a ring — "here I am", the last thing on
+ * offer before the page moves on. Like `Reveal`, this is an exception to §2
+ * principle 4 (nothing animates because it scrolled into view), made on
+ * purpose for one element. Unlike `Reveal` it re-arms: scroll back up and it
+ * settles, come back down and it calls again.
  *
- * `self-start` matters. Left to stretch, the grid gives this cell the height of
- * whichever card shares its row — a bone box the size of a project with three
- * lines in one corner, which reads as a rendering fault rather than a panel.
- * The 16/10 is the cards' own cover proportion, so the cell takes its size from
- * the thing beside it instead of guessing one.
+ * The trigger is a sentinel at the very bottom of the floor, so it fires when
+ * the section's end is near — `CALL_LEAD_PX` before its last pixel reaches
+ * the screen, a few wheel steps early — rather than on the very last scroll.
+ * The motion lives in `.github-exit` (substrate.css), which is also where
+ * reduced motion keeps the colour change and drops the movement.
  *
- * The handle comes from `socials`, so the profile's GitHub address is written
- * down in exactly one place.
+ * Pill-shaped like the folders' own buttons, so it reads as part of that
+ * family. The address comes from `socials`, so the profile's GitHub link is
+ * written down in exactly one place.
  */
+/**
+ * How far ahead of the section's floor the call starts — about three wheel
+ * steps. At this lead the button is still ~80px below the fold when the call
+ * starts and rises into view within one more step, while its rings (~2.6s)
+ * are still going. Much larger and the wiggle would play out unseen.
+ */
+const CALL_LEAD_PX = 240;
+
 export function MoreOnGitHub() {
   const github = socials.find((s) => s.label === 'GitHub');
+  const sentinel = useRef<HTMLSpanElement>(null);
+  const [calling, setCalling] = useState(false);
+
+  useEffect(() => {
+    const node = sentinel.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry) setCalling(entry.isIntersecting);
+      },
+      /* Grow the viewport downward, so the call starts a few scrolls before
+         the floor arrives rather than on the very last one. */
+      { rootMargin: `0px 0px ${CALL_LEAD_PX}px 0px` },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   if (!github) return null;
 
   return (
-    <Plate
-      as="a"
-      surface="bone"
-      href={github.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex aspect-[16/10] flex-col items-start justify-between self-start p-3 transition-colors hover:border-accent-text"
-    >
-      <Data tone="muted">Everything else</Data>
+    <div className="github-exit relative flex justify-center px-3 pt-2 pb-20" data-call={calling || undefined}>
+      <Button
+        as="a"
+        href={github.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        variant="ghost"
+        className="github-exit__btn relative rounded-pill"
+      >
+        <SocialIcon label="GitHub" className="size-2" />
+        More on GitHub ↗
+      </Button>
 
-      <div>
-        <span className="t-h3 block text-fg transition-colors group-hover:text-accent-text">
-          More on GitHub ↗
-        </span>
-        <Data tone="accent">{github.handle}</Data>
-      </div>
-    </Plate>
+      <span ref={sentinel} className="absolute inset-x-0 bottom-0 h-px" aria-hidden="true" />
+    </div>
   );
 }

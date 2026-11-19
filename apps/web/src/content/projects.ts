@@ -46,6 +46,61 @@ export const projects: Project[] = [
     hasCaseStudy: false,
   },
   {
+    slug: 'bookquest',
+    title: 'BookQuest',
+    year: 2026,
+    summary: {
+      en: 'An annual reading competition: everyone reads the same book by a deadline, then takes a quiz — fastest and most accurate win, and everyone who finishes gets a certificate. It runs first as a Telegram Mini App, signing people in by verifying Telegram’s own signed launch data, and second as a standalone web app. The quiz engine is the hard part: per-participant question variants, attempts timed on the server so a slow phone cannot buy extra seconds, a live monitor for organisers, and results ranked once at publication and then frozen.',
+      uz: 'Har yili oʻtkaziladigan kitobxonlik musobaqasi: hamma bitta kitobni muddatgacha oʻqiydi, soʻng test topshiradi — eng tez va aniq javob berganlar gʻolib, oxirigacha yetganlarning barchasi sertifikat oladi. Avvalo Telegram Mini App, keyin alohida veb-ilova sifatida ishlaydi.',
+    },
+    tagline: {
+      en: 'A yearly reading competition as a Telegram Mini App — read the book, beat the clock on the quiz.',
+      uz: 'Telegram Mini App koʻrinishidagi yillik kitobxonlik musobaqasi — kitobni oʻqing, testda vaqtni yuting.',
+    },
+    highlights: [
+      { label: 'Fullstack', kind: 'scope' },
+      { label: 'React + Express', kind: 'stack' },
+      { label: 'Telegram Mini App', kind: 'feature' },
+    ],
+    stack: ['React 19', 'TypeScript', 'Express', 'MongoDB', 'Tailwind'],
+    tags: ['live'],
+    links: { demo: 'https://bookquest.uz', source: 'https://github.com/mirzakhalov03/BookQuest' },
+    cover: {
+      url: '/work/bookquest.jpg',
+      alt: 'BookQuest 2026 home — this year’s book on a lit stage, with a countdown to the reading period and a “Join BookQuest” button',
+    },
+    featured: true,
+    hasCaseStudy: false,
+  },
+  {
+    slug: 'printupp',
+    title: 'PrintUpp',
+    year: 2026,
+    summary: {
+      en: 'Event registration and badge printing for organizations — no more Excel, Word or endless clicks. An attendee list syncs in from Google Sheets, a template designer lays out the badge to the millimetre, and the browser drives the label printer directly. At the door, QR stations turn a phone scan into a printed badge on the laptop beside the printer. Each organization keeps its own events, members and printers, private to it.',
+      uz: 'Tashkilotlar uchun tadbirga roʻyxatdan oʻtkazish va beyj chop etish — Excel, Word va behisob bosishlarsiz. Ishtirokchilar roʻyxati Google Sheets’dan sinxronlanadi, beyj shabloni millimetrgacha chiziladi, brauzer esa printerni toʻgʻridan-toʻgʻri boshqaradi. Kirishda telefon QR kodni skanerlaydi — noutbuk yonidagi printer beyjni chiqaradi.',
+    },
+    tagline: {
+      en: 'Print event badges in five seconds — registration, templates and printing in one place.',
+      uz: 'Tadbir beyjlarini besh soniyada chop eting — roʻyxat, shablon va chop etish bir joyda.',
+    },
+    highlights: [
+      { label: 'Fullstack', kind: 'scope' },
+      { label: 'React + Express', kind: 'stack' },
+      { label: 'Browser → label printer', kind: 'feature' },
+    ],
+    stack: ['React', 'TypeScript', 'Express', 'PostgreSQL'],
+    tags: ['live'],
+    /* Private repository — the live product is the only link. */
+    links: { demo: 'https://printupp.uz' },
+    cover: {
+      url: '/work/printupp.jpg',
+      alt: 'PrintUpp landing page — “Print event badges in 5 seconds” beside a printer issuing a speaker badge',
+    },
+    featured: true,
+    hasCaseStudy: false,
+  },
+  {
     slug: 'otolor-uz',
     title: 'Otolor.uz',
     year: 2026,
@@ -168,7 +223,7 @@ export const projects: Project[] = [
     links: { demo: 'https://glowstore.vercel.app', source: 'https://github.com/mirzakhalov03/Glow-Store' },
     cover: { url: '/work/glow-store.jpg', alt: 'Glow Store product grid with filtering sidebar' },
     /* Unfeatured when Otolor landed. The home grid holds five, and a storefront
-       against a public API is the weakest of six claims — it stays on /work. */
+       against a public API is the weakest of six claims. */
     featured: false,
     hasCaseStudy: true,
   },
@@ -361,3 +416,4 @@ export const projects: Project[] = [
 ];
 
 export const featuredProjects = projects.filter((p) => p.featured);
+

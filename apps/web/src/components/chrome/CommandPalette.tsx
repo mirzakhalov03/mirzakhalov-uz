@@ -7,7 +7,6 @@ type Command = { id: string; label: string; group: string; to?: string; href?: s
 
 const COMMANDS: Command[] = [
   { id: 'home', label: 'Home', group: 'Go', to: '/' },
-  { id: 'work-index', label: 'All work', group: 'Go', to: '/work' },
   { id: 'sec-about', label: 'About', group: 'Section', to: '/#about' },
   { id: 'sec-projects', label: 'Projects', group: 'Section', to: '/#projects' },
   { id: 'sec-media', label: 'Media', group: 'Section', to: '/#media' },

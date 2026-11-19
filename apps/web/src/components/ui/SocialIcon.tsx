@@ -7,7 +7,17 @@ import { socialIcons } from '../content/social-icons.js';
  * so it stays on the site's own `currentColor` icon set (Lucide, §3.5)
  * instead of a brand path.
  */
-export function SocialIcon({ label, className }: { label: string; className?: string }) {
+export function SocialIcon({
+  label,
+  className,
+  mono = false,
+}: {
+  label: string;
+  className?: string;
+  /** Draw in `currentColor` instead of the brand colour — for a mark on a
+   *  filled button, where the brand colour would fight the fill. */
+  mono?: boolean;
+}) {
   if (label === 'Email') return <Mail className={className} aria-hidden="true" />;
 
   const glyph = socialIcons[label];
@@ -15,7 +25,7 @@ export function SocialIcon({ label, className }: { label: string; className?: st
 
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
-      <path d={glyph.d} fill={glyph.color} />
+      <path d={glyph.d} fill={mono ? 'currentColor' : glyph.color} />
     </svg>
   );
 }

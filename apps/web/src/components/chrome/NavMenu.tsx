@@ -18,7 +18,7 @@ export function BurgerButton({ open, onClick }: { open: boolean; onClick: () => 
       aria-controls="nav-menu"
       aria-label={open ? 'Close menu' : 'Menu'}
       data-open={open ? '' : undefined}
-      className="nav-burger -mr-1 shrink-0 sm:hidden"
+      className="nav-burger -mr-1 shrink-0"
     >
       <span aria-hidden="true" className="nav-burger__bar" />
       <span aria-hidden="true" className="nav-burger__bar" />

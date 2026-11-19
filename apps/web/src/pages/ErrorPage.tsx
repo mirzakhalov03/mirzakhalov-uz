@@ -35,7 +35,7 @@ export function ErrorPage() {
             <Button as={Link} to="/">
               Back to the start
             </Button>
-            <Button as={Link} to="/work" variant="ghost">
+            <Button as={Link} to="/#projects" variant="ghost">
               See the work
             </Button>
           </div>

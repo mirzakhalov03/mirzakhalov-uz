@@ -75,7 +75,10 @@ export function ExperienceChapter() {
 
       <div className="mt-8 border-t border-line pt-5 lg:mt-10 lg:pt-6">
         <StackCombHeader items={stack} />
-        <div className="mt-6 lg:mt-8">
+        {/* A container so the comb can size its cells off this width (substrate.css).
+            pb-20 (160px) is runway after the last row, so the comb holds the
+            screen a beat before the next section slides over it. */}
+        <div className="@container mt-6 pb-20 lg:mt-8">
           <StackComb items={stack} />
         </div>
       </div>

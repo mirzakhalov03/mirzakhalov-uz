@@ -70,7 +70,7 @@ export function TimelineEntry({
           <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
             <h4 className="t-h4 truncate text-fg">{entry.org}</h4>
             {entry.note ? <Data className="whitespace-nowrap">({entry.note})</Data> : null}
-            {current ? <Chip tone="live">Current</Chip> : null}
+            {current ? <Chip tone="liveSolid">Current</Chip> : null}
           </div>
           <Data tone="fg">{entry.role}</Data>
           <Data>

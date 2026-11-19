@@ -24,20 +24,13 @@ export const profile = {
 
   bio: {
     en: [
-      'I build interfaces for the web, mostly in React and TypeScript. The work I am proudest of is a booking system for a medical clinic in Tashkent — real patients use it to hold a slot with a doctor, and it has to keep working on an old Android phone over a bad connection.',
-      'Before software I taught English: two years of ESL and IELTS classes. That is where I learned that explaining something clearly is most of the job, whether the room is a classroom or a codebase. I still write, in English and Uzbek.',
-      'I am studying at INHA University in Tashkent, with a 1330 SAT, a band 8.0 IELTS, and scholarship offers from seven American universities behind me.',
+      'I’m a full-stack developer in Tashkent. I build web products end to end — React and TypeScript on the front, Node and Express behind — and ship them to real users.',
+      'I study at INHA University and volunteer with IT Community of Uzbekistan.',
     ],
   },
 
-  /* The line at the foot of every page. Two years of teaching and a clinic
-     booking system say the same thing, so the footer says it once. */
-  motto: 'Clarity is most of the job — in a classroom or in a codebase.',
-
-  now: {
-    text: 'Rebuilding this site in the open — React 19, a design system drawn from scratch, and an Express API so that publishing a project stops being a commit.',
-    updatedAt: '2026-09-01',
-  },
+  /* The line under the logo in the footer — a welcome, not a slogan. */
+  motto: 'Glad you stopped by. Always happy to help if you need it.',
 } as const;
 
 export const socials: Social[] = [
@@ -46,7 +39,7 @@ export const socials: Social[] = [
   {
     label: 'LinkedIn',
     handle: 'Javohir Mirzakhalov',
-    url: 'https://www.linkedin.com/in/javohir-mirzakhalov',
+    url: 'https://www.linkedin.com/in/mirzakhalov03',
   },
   {
     label: 'Email',
@@ -56,9 +49,9 @@ export const socials: Social[] = [
 ];
 
 export const languages: Language[] = [
-  { name: 'Uzbek', level: 'Native' },
-  { name: 'English', level: 'Fully proficient', note: 'IELTS 8.0' },
-  { name: 'Russian', level: 'Intermediate' },
+  { name: 'Uzbek', level: 'Native', score: 5 },
+  { name: 'English', level: 'Fully proficient', score: 5, note: 'IELTS 8.0' },
+  { name: 'Russian', level: 'Intermediate', score: 3 },
 ];
 
 /**
@@ -155,6 +148,7 @@ export const experience: ExperienceEntry[] = [
     role: 'Software Engineer',
     from: '2026-03',
     to: null,
+    note: 'full-time',
     detail: 'Building product interfaces in React and TypeScript.',
     image: { url: '/experience/vention.jpg', alt: 'Vention logo' },
   },
