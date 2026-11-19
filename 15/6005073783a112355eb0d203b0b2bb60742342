@@ -1,0 +1,71 @@
+apps/web/src/components/content/social-icons.ts
+  s_5a37ae85292c55::t_425ed4d3d86057 1-22
+apps/web/src/components/ui/Chip.tsx
+  s_3431672f1ee7c9::t_a425872a8ffdbe 3-4,11-22,28-32,34-42,44
+apps/web/src/components/ui/ImageLightbox.tsx
+  s_773642ed771f2f::t_1d13e3e5ea788c 1-128
+apps/web/src/components/ui/ImagePlaceholder.tsx
+  s_773642ed771f2f::t_8f9aa049ff5351 1-45
+apps/web/src/components/ui/Reveal.tsx
+  s_552ee6a9c7d71b::t_3ecfbbcc8a0e9a 1-65
+apps/web/src/components/ui/SocialIcon.tsx
+  s_5a37ae85292c55::t_3b23dc2920abb8 1-21
+apps/web/src/lib/useStack.ts
+  s_552ee6a9c7d71b::t_f1302582a78247 37-46,48
+apps/web/src/primitives/Plate.tsx
+  s_773642ed771f2f::t_615b5b5852b397 6,9-12,26,36
+apps/web/src/styles/substrate.css
+  s_a376b606067bfa::t_0bf6000ec5bcb4 555,583,588-590,593-597,603-620,664,681,699,719,842-855,857-864,868,872,874-876,878,880,882-883,885,887-889,891-893,897-898,901,903-907,909-942,954-956,971-981,983,986-997,1004-1006,1008-1021,1033-1037,1042,1044-1047,1051-1053,1056-1057,1060-1061,1064-1066,1069-1078,1081-1084,1086-1088,1090-1093,1095-1102,1105-1108,1111-1116,1151-1166,1244-1372
+apps/web/src/styles/tokens.css
+  s_5a37ae85292c55::t_99edba5826b3ec 36-59,100-106,119-142,157-170
+apps/web/src/styles/theme.css
+  s_a376b606067bfa::t_beb02e8a706a82 102-130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "156005073783a112355eb0d203b0b2bb60742342",
+  "prompts": {},
+  "sessions": {
+    "s_3431672f1ee7c9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6fbe2139-9332-4001-a8bc-c0fd1a27d3a8",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_552ee6a9c7d71b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f874ad32-034f-4d0e-9f75-b3e8e641c69f",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_5a37ae85292c55": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b3e0a4a7-5a13-4a7b-be20-0351be02986b",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_773642ed771f2f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a78978f2-2d29-4acd-b282-eb212b60c0ed",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_a376b606067bfa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ba401393-b447-47fa-ae5b-8759ec9c5e86",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
