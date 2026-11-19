@@ -1,0 +1,35 @@
+apps/web/src/components/content/MediaMentionCard.tsx
+  s_773642ed771f2f::t_7e51d4f403450a 1-81
+apps/web/src/components/content/MoreOnGitHub.tsx
+  s_3431672f1ee7c9::t_2622c97cedd4aa 1-45
+apps/web/src/components/content/PortraitGrid.tsx
+  s_773642ed771f2f::t_9abfcc7b361d4d 1-55
+apps/web/src/components/content/ProjectCard.tsx
+  s_3431672f1ee7c9::t_11bfa823cd5411 1-110
+apps/web/src/pages/HomePage.tsx
+  s_3431672f1ee7c9::t_6bfa97d4032ba2 10-13,16,29-31,34,38-40,48-50,52-53,55,59-71,73,75,81-91,93-123,125,127,129,131-165,180-184,189,197-198
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "4f37df7ae2daecbb766716d1eed74c0fb1d424ae",
+  "prompts": {},
+  "sessions": {
+    "s_3431672f1ee7c9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6fbe2139-9332-4001-a8bc-c0fd1a27d3a8",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    },
+    "s_773642ed771f2f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a78978f2-2d29-4acd-b282-eb212b60c0ed",
+        "model": "unknown"
+      },
+      "human_author": "Javohir Mirzakhalov <68010314+mirzakhalov03@users.noreply.github.com>"
+    }
+  }
+}
