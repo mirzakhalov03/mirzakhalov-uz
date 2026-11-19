@@ -99,6 +99,35 @@
   --surface-well: var(--surface-well);
 }
 
+/* --- the white value set — a pure white ground ----------------------------- */
+[data-surface='white'] {
+  color-scheme: light;
+
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-well: #f9f9f9;
+
+  --fg: var(--color-void);
+  --fg-muted: #4a4640;
+  --fg-subtle: rgb(12 10 20 / 0.4);
+
+  --line: rgb(12 10 20 / 0.18);
+  --line-strong: rgb(12 10 20 / 0.38);
+
+  --accent: var(--color-violet);
+  --accent-text: var(--color-violet-deep);
+  --measured: var(--color-void);
+  --measured-rule: #b98a2c;
+  --live: var(--color-mint-deep);
+  --danger: var(--color-rose-deep);
+
+  --grid: rgb(74 50 214 / 0.1);
+  --grid-major: rgb(74 50 214 / 0.2);
+  --mark: var(--color-violet-deep);
+
+  --shade: rgb(12 10 20 / 0.42);
+}
+
 /**
  * Expose the semantic layer to Tailwind. `inline` is what makes this work:
  * it emits `var(--surface)` rather than resolving to a literal at build time,

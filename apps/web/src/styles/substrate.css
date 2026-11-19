@@ -552,7 +552,7 @@
    ========================================================================== */
 
 .comb {
-  --comb-cell: 96px;
+  --comb-cell: 80px;
   --comb-gap: 6px;
   --comb-step: calc(var(--comb-cell) + var(--comb-gap));
   --comb-height: calc(var(--comb-cell) * 1.1547);
@@ -580,27 +580,44 @@
      facets: a percentage inset tracks the cell as the breakpoints resize it. */
   padding-inline: 11%;
   text-align: center;
+  border: 1.5px solid var(--color-violet);
   background-color: var(--color-bone-raised);
   color: var(--color-void);
   transition:
     background-color var(--duration-micro) var(--ease-plate),
-    color var(--duration-micro) var(--ease-plate);
+    color var(--duration-micro) var(--ease-plate),
+    transform var(--duration-micro) var(--ease-plate),
+    filter var(--duration-micro) var(--ease-plate);
 }
 
-/* Daily use, marked on the cell's base facet — the one place on a hexagon where
-   a straight rule reads as part of the shape rather than a border stuck to it. */
-.comb__cell[data-frequency='daily']::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  inset-inline: 0;
-  height: 13%;
-  background-color: var(--color-violet);
+/* AI tools sit in the same comb rather than a comb of their own (`StackComb`),
+   so the fill is what tells the two groups apart — a violet tint mixed into
+   the same bone-raised base, not a second border or a legend. */
+.comb__cell[data-group='ai'] {
+  background-color: color-mix(in srgb, var(--color-violet) 16%, var(--color-bone-raised));
 }
 
 .comb__cell:hover {
   background-color: var(--color-violet);
   color: var(--color-bone);
+  transform: translateY(-4px);
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.18));
+}
+
+/* A small hexagon of its own — same 2/√3 proportion and 25/75 facets as the
+   cell, so the backdrop reads as a honeycomb detail rather than a badge —
+   giving every glyph a constant bone ground the violet hover fill can't
+   swallow a brand colour into. */
+.comb__glyph-plate {
+  display: grid;
+  place-items: center;
+  width: calc(var(--comb-cell) * 0.46);
+  height: calc(var(--comb-cell) * 0.46 * 1.1547);
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  background-color: var(--color-bone);
+  /* Pins currentColor marks to void regardless of the cell's own hover
+     colour — they sit on a constant bone ground now, not the cell fill. */
+  color: var(--color-void);
 }
 
 .comb__glyph {
@@ -629,16 +646,6 @@
   hyphens: none;
 }
 
-/* The legend's swatch: the base facet on its own, as a triangle. */
-.comb-key {
-  display: inline-block;
-  width: 9px;
-  height: 8px;
-  vertical-align: -1px;
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  background-color: var(--color-violet);
-}
-
 /* The offset. Every cell shifts a quarter step left; every second *row* shifts
    a quarter step right, which puts its cells in the notches of the row above.
    Row parity in a grid of N columns is a 2N cycle, so each breakpoint restates
@@ -654,7 +661,7 @@
 
 @media (min-width: 400px) {
   .comb {
-    --comb-cell: 100px;
+    --comb-cell: 84px;
     grid-template-columns: repeat(3, var(--comb-cell));
   }
 
@@ -671,7 +678,7 @@
 
 @media (min-width: 640px) {
   .comb {
-    --comb-cell: 112px;
+    --comb-cell: 94px;
     grid-template-columns: repeat(4, var(--comb-cell));
   }
 
@@ -689,7 +696,7 @@
 
 @media (min-width: 1024px) {
   .comb {
-    --comb-cell: 118px;
+    --comb-cell: 100px;
     grid-template-columns: repeat(6, var(--comb-cell));
   }
 
@@ -709,7 +716,7 @@
 
 @media (min-width: 1280px) {
   .comb {
-    --comb-cell: 136px;
+    --comb-cell: 114px;
   }
 }
 
@@ -832,59 +839,107 @@
   text-transform: uppercase;
 }
 
-/* --- the chapter tabs -----------------------------------------------------
-   One tablist, two treatments. Below lg it is a bar under the top bar; from lg
-   it is a rail beside the content. Both are plain position: sticky inside the
-   About panel, which is what makes the tabs leave when the section ends
-   without a single line of unpin logic.
+/* --- the chapter rail (§4.2) -----------------------------------------------
+   Ported from uyqulab.uz's section nav: an eyebrow, then a column of pills with
+   an icon chip each, the current one filled and lifted.
 
-   The rail keeps its sliding marker alongside the fill. They are not the same
-   statement: the fill says which chapter is open, the marker says where in an
-   ordered set of three the reader has got to — and since scrolling is what
-   moves them through it, that is the part that has to move. */
+   Two treatments, one markup. Below lg it is a bar under the top bar; from lg a
+   rail beside the content. Both are plain position: sticky inside the About
+   panel, which is what makes the rail leave when the section ends without a
+   line of unpin logic.
+
+   Note what this no longer has: no sliding marker, no --about-nav-index, no
+   step arithmetic. The rail used to say "you are 2 of 3 through an ordered set"
+   because scrolling swapped panels underneath it and nothing else could. The
+   reader scrolls the chapters themselves now, so the scrollbar says that, and
+   the pill only has to say which chapter they are in. */
+
+.about-nav__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-data);
+  letter-spacing: var(--text-data--letter-spacing);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+}
 
 .about-nav__list {
   display: flex;
-  gap: var(--spacing);
+  gap: calc(var(--spacing) * 0.75);
 }
 
 .about-nav__link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  gap: calc(var(--spacing) * 1.5);
+  padding: calc(var(--spacing) * 1.75) calc(var(--spacing) * 2);
+  border-radius: var(--radius-pill);
   font-family: var(--font-sans);
-  font-size: var(--text-h4);
+  font-size: var(--text-body);
   font-weight: 600;
-  /* The label is a single uppercase line in a fixed-height box, so it is
-     centred by the box rather than by a line-height that would have to be
-     re-tuned every time the box changed. */
-  line-height: 1;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  line-height: 1.2;
   white-space: nowrap;
-  color: var(--fg-muted);
+  color: var(--fg);
+  text-decoration: none;
   background-color: transparent;
-  border: 1px solid var(--line);
+  box-shadow: 0 0 0 0 transparent;
   cursor: pointer;
+  /* Named properties rather than `all`. `all` would animate the box-shadow the
+     focus ring paints too, so a keyboard focus would fade in over 300ms instead
+     of appearing — the one state that must never lag the key that caused it. */
   transition:
-    color var(--duration-micro) var(--ease-plate),
-    background-color var(--duration-micro) var(--ease-plate),
-    border-color var(--duration-micro) var(--ease-plate);
+    color var(--duration-tab) var(--ease-plate),
+    background-color var(--duration-tab) var(--ease-plate),
+    box-shadow var(--duration-tab) var(--ease-plate);
 }
 
 .about-nav__link:hover {
-  color: var(--fg);
-  border-color: var(--line-strong);
+  background-color: var(--surface-raised);
+  box-shadow: var(--shadow-soft);
 }
 
-/* The selected fill, and the reason it needs no new token.
+/* The fill, and why it needs no new colour.
    --accent-text is defined as this ground's accent *at text contrast against
-   --surface*. Swapping the pair keeps that guarantee and inverts nothing else,
-   so one rule is correct on both grounds: violet-hot on void at 5.6:1, and
-   violet-deep on bone at 6.3:1. Reaching for --accent instead would have
-   landed at 4.1:1 — legible, but under AA for a label this size. */
-.about-nav__link[aria-selected='true'] {
+   --surface*, so swapping the pair keeps that guarantee and inverts nothing
+   else: violet-hot on void at 5.6:1, violet-deep on bone at 6.3:1. --accent as
+   a fill would have landed at 4.1:1 — legible, but under AA for a label this
+   size. */
+.about-nav__link[aria-current] {
   background-color: var(--accent-text);
-  border-color: var(--accent-text);
+  color: var(--surface);
+  box-shadow: var(--shadow-glow);
+}
+
+.about-nav__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: calc(var(--spacing) * 4);
+  height: calc(var(--spacing) * 4);
+  border-radius: var(--radius-chip);
+  background-color: var(--surface-raised);
+  color: var(--accent-text);
+  transition:
+    background-color var(--duration-tab) var(--ease-plate),
+    color var(--duration-tab) var(--ease-plate);
+}
+
+.about-nav__icon > svg {
+  width: calc(var(--spacing) * 2.25);
+  height: calc(var(--spacing) * 2.25);
+}
+
+.about-nav__link:hover .about-nav__icon {
+  background-color: color-mix(in srgb, var(--accent-text) 14%, transparent);
+}
+
+/* On the filled pill the chip has to read as a window cut into the fill. The
+   reference lightens with white/15 because its pill is dark; this one is
+   violet at text contrast against a near-black ground, so the fill is the
+   light half of the pair and the chip darkens instead. Mixed from --surface so
+   it stays the ground's own black on either surface. */
+.about-nav__link[aria-current] .about-nav__icon {
+  background-color: color-mix(in srgb, var(--surface) 20%, transparent);
   color: var(--surface);
 }
 
@@ -896,10 +951,9 @@
     top: calc(var(--bar-h) + var(--section-head-h, 0px));
     z-index: 20;
     /* Break the container gutter so the rule under the bar runs edge to edge,
-       then put the gutter back on the contents. Page's gutter is px-3
-       sm:px-4 (24px below 640px, 32px from 640px up to lg), so the same two
-       numbers show up here — the nested rule below switches at Page's own
-       breakpoint. */
+       then put the gutter back on the contents. Page's gutter is px-3 sm:px-4
+       (24px below 640px, 32px from 640px up to lg), so the same two numbers
+       show up here — the nested rule below switches at Page's own breakpoint. */
     margin-inline: calc(var(--spacing) * -3);
     padding-inline: calc(var(--spacing) * 3);
     padding-block: calc(var(--spacing) * 1.5);
@@ -914,180 +968,155 @@
     }
   }
 
-  /* Three tabs this size overrun a small phone by about a tab's worth. The
-     strip scrolls rather than shrinking the type back down, and the third tab
-     is left part-visible, which is what says it scrolls. */
+  /* The eyebrow is the rail's label and the rail is a column. As a bar it is a
+     second line of chrome stuck under the title that already says About. */
+  .about-nav__eyebrow {
+    display: none;
+  }
+
+  /* Three pills overrun a phone whatever they are trimmed to — "Experience"
+     alone is a third of a 390px screen — so the strip scrolls rather than
+     shrinking the type past reading size. The padding and its negative margin
+     keep the active pill's glow from being clipped by the strip's own overflow
+     edge. */
   .about-nav__list {
+    position: relative;
     overflow-x: auto;
     scrollbar-width: none;
+    padding-block: var(--spacing);
+    margin-block: calc(var(--spacing) * -1);
+    /* A pill cut dead at the viewport edge reads as a clipping bug. Fading the
+       last 32px says the strip continues and can be dragged — the affordance
+       the hidden scrollbar takes away.
+       `black` here is an alpha stencil, not a pigment: a mask uses only the
+       alpha channel, so the colour is arbitrary and no §8.8 hex is involved. */
+    mask-image: linear-gradient(
+      to right,
+      black calc(100% - var(--spacing) * 4),
+      transparent
+    );
   }
 
   .about-nav__list::-webkit-scrollbar {
     display: none;
   }
 
+  /* Trimmed against the phone: one step down in type, tighter box, smaller
+     chip. It does not stop the strip overflowing — nothing short of dropping
+     the labels would — but it buys most of a second pill on screen at rest. */
   .about-nav__link {
-    flex: 1 0 auto;
-    justify-content: center;
-    min-height: calc(var(--spacing) * 6);
-    padding-inline: calc(var(--spacing) * 1.5);
+    flex: 0 0 auto;
+    gap: calc(var(--spacing) * 1.25);
+    padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 1.75);
+    font-size: var(--text-caption);
+  }
+
+  .about-nav__icon {
+    width: calc(var(--spacing) * 3.5);
+    height: calc(var(--spacing) * 3.5);
+  }
+
+  .about-nav__icon > svg {
+    width: calc(var(--spacing) * 2);
+    height: calc(var(--spacing) * 2);
   }
 }
 
 /* The rail. */
 @media (min-width: 1024px) {
   .about-nav {
-    /* The tab's box, and the pitch the marker travels on — the gap above is
-       what separates the two, so the step has to restate it or the marker
-       drifts a gap further out of true with every chapter. */
-    --about-nav-tab: calc(var(--spacing) * 6);
-    --about-nav-step: calc(var(--about-nav-tab) + var(--spacing));
     position: sticky;
     top: calc(var(--bar-h) + var(--section-head-h, 0px) + var(--spacing) * 2);
     align-self: start;
   }
 
-  .about-nav__list {
-    position: relative;
-    flex-direction: column;
-    align-items: stretch;
-    padding-left: calc(var(--spacing) * 2);
-  }
-
-  .about-nav__list::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: calc((var(--about-nav-tab) - var(--spacing) * 2) / 2);
-    width: 2px;
-    height: calc(var(--spacing) * 2);
-    background-color: var(--accent);
-    translate: 0 calc(var(--about-nav-index, 0) * var(--about-nav-step));
-    /* The same clock the chapter's entrance runs on, so the marker arriving and
-       the new chapter arriving read as one movement rather than two. */
-    transition: translate calc(var(--duration-micro) * 2) var(--ease-plate);
-  }
-
-  .about-nav__link {
-    justify-content: flex-start;
-    min-height: var(--about-nav-tab);
+  .about-nav__eyebrow {
+    margin-bottom: calc(var(--spacing) * 1.5);
     padding-inline: calc(var(--spacing) * 2);
   }
+
+  .about-nav__list {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
-/* --- the chapter panel ----------------------------------------------------
-   One panel is mounted at a time and it is keyed on the active tab, so this
-   plays on every switch. It is not §2 principle 4's forbidden case — nothing
-   animates here because it scrolled into view; it animates because the reader
-   pressed a control, and the movement is the answer to the press. */
+@media (prefers-reduced-motion: reduce) {
+  .about-nav__link,
+  .about-nav__icon {
+    transition: none;
+  }
+}
+
+/* --- the chapter ----------------------------------------------------------
+   A block in the column, not a panel. The rule between two chapters is the
+   separator; the last one drops it because the section's own edge follows. */
 
 .about-chapter {
-  /* The panel is a tab stop in its own right (Story holds nothing focusable),
-     so the focus ring has to clear its content rather than sit on the text. */
-  outline-offset: 4px;
+  padding-block: calc(var(--spacing) * 7);
+  border-bottom: 1px solid var(--line);
 }
 
-/* The column the chapter and its runways sit in, and the whole of the turn's
-   choreography.
-
-   The page has to be repositioned for a chapter of a different height, and a
-   reposition the reader can see is a snap however it is eased. So it happens
-   while this is at opacity 0: the content leaves in the direction of travel,
-   the page is parked behind the blank, and the new chapter arrives from the
-   side the reader came from. Nothing visible moves during the jump, so there is
-   nothing to see jump.
-
-   --about-leave is written by AboutSection, because the timeout that commits
-   the swap and this transition have to agree to the millisecond. */
-
-.about-column {
-  transition:
-    opacity var(--about-leave, 200ms) var(--ease-plate),
-    translate var(--about-leave, 200ms) var(--ease-plate);
+.about-chapter:first-child {
+  padding-top: calc(var(--spacing) * 3);
 }
 
-.about-column[data-leaving] {
+.about-chapter:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* The one gradient on the site, and the only thing in the section that is
+   decoration rather than structure. It is what the eye lands on when a chapter
+   arrives — a rule above a title says "something ended", this says "something
+   starts here", which is the job at the top of a block. */
+.about-chapter__bar {
+  display: block;
+  width: calc(var(--spacing) * 5);
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background-image: linear-gradient(to right, var(--accent-text), var(--accent));
+}
+
+/* --- the reveal -----------------------------------------------------------
+   The one place on the site where content animates *because* it scrolled into
+   view, which §2 principle 4 otherwise forbids. Kept to a single class so the
+   exception is visible in one place rather than spread across components.
+
+   `translate` rather than a transform, so it composes with anything the child
+   already transforms instead of overwriting it. Both properties are
+   compositor-driven, so the whole effect runs off the main thread.
+
+   will-change is on the *pending* state only. Left on permanently — as the
+   reference has it — every revealed block keeps its own compositor layer for
+   the life of the page, which on a section of this size is real memory for no
+   benefit once the transition has run. */
+
+.reveal {
   opacity: 0;
-  /* Away from where the reader is going: scrolling down pushes the old chapter
-     up and out, and the new one rises in behind it. */
-  translate: 0 calc(var(--turn-dir, 1) * -6px);
-  pointer-events: none;
+  translate: 0 calc(var(--spacing) * 2.5);
+  transition:
+    opacity var(--duration-reveal) var(--ease-reveal),
+    translate var(--duration-reveal) var(--ease-reveal);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, translate;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .about-chapter {
-    animation: about-chapter-in calc(var(--duration-micro) * 2) var(--ease-plate) both;
-  }
-}
-
-@keyframes about-chapter-in {
-  from {
-    opacity: 0;
-    translate: 0 calc(var(--turn-dir, 1) * var(--spacing) * 0.75);
-  }
+.reveal.is-shown {
+  opacity: 1;
+  translate: none;
+  will-change: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .about-column {
+  .reveal {
+    opacity: 1;
+    translate: none;
     transition: none;
+    will-change: auto;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .about-nav__list::before {
-    transition: none;
-  }
-}
-
-/* --- the turn -------------------------------------------------------------
-   The runway between two chapters. Scrolling it fully into view is what opens
-   the next one, so its height is not decoration: it is how far past the end of
-   a chapter the reader has to keep going before the page turns. svh rather
-   than vh, because on a phone a URL bar sliding away must not move the
-   threshold under someone mid-gesture. */
-
-.about-turn {
-  --bob: 3px;
-  display: flex;
-  align-items: center;
-  gap: calc(var(--spacing) * 2);
-  height: 40svh;
-  min-height: calc(var(--spacing) * 20);
-}
-
-.about-turn[data-dir='back'] {
-  --bob: -3px;
-}
-
-.about-turn__rule {
-  flex: 1;
-  height: 1px;
-  background-color: var(--line);
-}
-
-.about-turn__label {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--spacing);
-  white-space: nowrap;
-  color: var(--accent-text);
-}
-
-/* The one animation on the site that runs at rest. It is a control's affordance
-   rather than an entrance — it says the gesture is available, and it stops
-   meaning anything the moment the reader makes it. */
-@media (prefers-reduced-motion: no-preference) {
-  .about-turn__arrow {
-    display: inline-block;
-    animation: about-turn-bob 1.8s var(--ease-plate) infinite;
-  }
-}
-
-@keyframes about-turn-bob {
-  50% {
-    translate: 0 var(--bob);
-  }
-}
 
 /* --- the experience timeline ---------------------------------------------
    A spine with entries hung off it. Down the left edge on a phone, because a
@@ -1117,6 +1146,22 @@
 .timeline__entry {
   position: relative;
   padding-left: calc(var(--spacing) * 5);
+}
+
+/* A bit narrower than the column it sits in, from lg — the card is a fixed
+   logo-left, text-right pill now rather than the full-width block it was, so
+   it doesn't need every pixel of the alternating column to read. A left-side
+   card is pushed to the far edge of its column so it still meets the tether
+   at the spine instead of leaving it stranded over empty space; a right-side
+   card is already flush against its own near edge by default. */
+@media (min-width: 1024px) {
+  .timeline__card {
+    max-width: 26rem;
+  }
+
+  .timeline__entry[data-side='left'] .timeline__card {
+    margin-left: auto;
+  }
 }
 
 /* The node is a registration cross, not a dot — the system already marks a
@@ -1167,13 +1212,6 @@
 
   .timeline__entry[data-side='left'] {
     grid-column: 1;
-    text-align: right;
-  }
-
-  /* text-align doesn't reach flex children — the org/chip row is a flex
-     row positioned by justify-content, so it needs its own rule. */
-  .timeline__entry[data-side='left'] .timeline__head {
-    justify-content: flex-end;
   }
 
   .timeline__entry[data-side='right'] {
@@ -1201,5 +1239,134 @@
   .timeline__entry[data-side='right']::after {
     left: calc(var(--spacing) * -3);
     width: calc(var(--spacing) * 3);
+  }
+}
+
+/* --- the "Load more" reveal ------------------------------------------------
+   Both rows below span the full grid width regardless of column count, so
+   the button sits centred on the spine and the hidden jobs' own left/right
+   grid (nested `.timeline`, no second spine of its own) has the same two
+   columns to alternate across as the visible one above it. */
+
+.timeline__more {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+}
+
+/* The 0fr → 1fr trick: animating a grid track's size, rather than
+   `max-height`, needs no guessed ceiling and settles on the content's real
+   height exactly. `.timeline__collapse-inner`'s `overflow: hidden` is what
+   lets the track shrink past its content's min-content size at 0fr — without
+   it the row would refuse to close. */
+.timeline__collapse {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 500ms var(--ease-plate);
+}
+
+.timeline__collapse[data-expanded] {
+  grid-template-rows: 1fr;
+}
+
+.timeline__collapse-inner {
+  overflow: hidden;
+  filter: blur(6px);
+  opacity: 0.6;
+  transition:
+    filter 500ms var(--ease-plate),
+    opacity 500ms var(--ease-plate);
+}
+
+.timeline__collapse[data-expanded] .timeline__collapse-inner {
+  filter: blur(0);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline__collapse {
+    transition: none;
+  }
+
+  .timeline__collapse-inner {
+    transition: none;
+  }
+}
+/* --- the mobile disclosure -------------------------------------------------
+   Three hairlines that fold into a cross. §3.4 keeps the system flat and
+   square, and a rule is what it draws everything else with, so the trigger
+   needs no icon set and no new token.
+
+   The bars sit on a 6px pitch (1px tall, 5px gap), which is why the outer two
+   travel exactly 6px to meet in the middle. Change the gap and the two numbers
+   have to move together or the cross stops closing. */
+
+.nav-burger {
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  /* 44px — the tap target, not the drawn mark, which is 18px wide. */
+  width: calc(var(--spacing) * 5.5);
+  height: calc(var(--spacing) * 5.5);
+  color: var(--fg);
+}
+
+.nav-burger__bar {
+  display: block;
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  transition:
+    transform 160ms var(--ease-plate),
+    opacity 160ms var(--ease-plate);
+}
+
+.nav-burger[data-open] .nav-burger__bar:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.nav-burger[data-open] .nav-burger__bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0.4);
+}
+
+.nav-burger[data-open] .nav-burger__bar:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* The list unfolds from under the bar rather than fading in place: the bar copy
+   above it is opaque and sits a layer up, so the travel is hidden behind it and
+   reads as the panel coming out of the chrome it belongs to. */
+
+.nav-menu__list {
+  animation: nav-menu-in 180ms var(--ease-plate);
+}
+
+@keyframes nav-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--spacing) * -1));
+  }
+}
+
+.nav-menu::backdrop {
+  animation: nav-menu-shade 180ms var(--ease-plate);
+}
+
+@keyframes nav-menu-shade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-burger__bar {
+    transition: none;
+  }
+
+  .nav-menu__list,
+  .nav-menu::backdrop {
+    animation: none;
   }
 }

@@ -33,6 +33,30 @@
   --color-rose: #ff7a7a;
   --color-rose-deep: #b3261e;
 
+  /* --- brand marks ---------------------------------------------------------
+   * Each tool in the stack comb (§3.5) draws its own logo in its own real
+   * colour rather than the site's `currentColor` — the one place §8.8's
+   * "no hex outside this file" rule applies to a third-party mark instead of
+   * the design system's own pigments. A brand with no published colour (its
+   * mark is drawn black) reuses `--color-void`/`--color-bone` instead of a
+   * one-off hex, so it still inverts correctly against the comb's hover fill.
+   *
+   * The contact channels (`social-icons.ts`) borrow the same exception. §4.7
+   * asks that list to read as "one weight, one rule, no gradients" — a small
+   * brand-colour mark beside each name doesn't reopen that: nothing varies in
+   * size or gets a halo, the colour just makes Telegram legible as Telegram
+   * rather than as an unlabelled glyph. GitHub's mark has no published colour
+   * either, so it stays on `currentColor` like Express and Next.js above. */
+  --color-brand-react: #61dafb;
+  --color-brand-typescript: #3178c6;
+  --color-brand-javascript: #f7df1e;
+  --color-brand-nodejs: #5fa04e;
+  --color-brand-tailwind: #06b6d4;
+  --color-brand-sass: #cc6699;
+  --color-brand-claude: #d97757;
+  --color-brand-telegram: #26a5e4;
+  --color-brand-linkedin: #0a66c2;
+
   /* --- type -------------------------------------------------------------- */
   --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', monospace;
@@ -73,6 +97,13 @@
   --text-body: 1.0625rem;
   --text-body--line-height: 1.65;
 
+  /* The one step below body, for prose that is deliberately secondary to what
+     sits above it — a project card's line under its highlight row. It is not a
+     licence to shrink body copy: anything a reader is meant to *read* stays at
+     --text-body, and anything shorter than a sentence is mono (--text-data). */
+  --text-caption: 0.9375rem;
+  --text-caption--line-height: 1.5;
+
   --text-data: 0.6875rem;
   --text-data--line-height: 1.45;
   --text-data--letter-spacing: 0.09em;
@@ -85,7 +116,30 @@
   --text-numeral--line-height: 0.9;
 
   /* --- structure --------------------------------------------------------- */
-  --radius-*: initial; /* §3.4: radius 0, everywhere, no exceptions. */
+  /* §3.4 said radius 0 everywhere, no exceptions. There are now exactly three,
+     and they are named rather than numbered so they cannot be reached for
+     casually: the About rail's pills and their icon chips (ported deliberately
+     from uyqulab.uz's section nav), and the corner on a logo/photo frame
+     (Education, Experience, Certificates) — a deliberate softening for
+     third-party marks that arrive in every shape but square-cornered doesn't
+     suit.
+     `initial` still comes first and still deletes Tailwind's whole default
+     radius scale — `rounded-lg`, `rounded-md` and the rest do not exist. Only
+     `rounded-pill`, `rounded-chip` and `rounded-frame` are generated, so a
+     fourth rounded corner has to be added here, on purpose, in front of this
+     comment. */
+  --radius-*: initial;
+  --radius-chip: 12px;
+  --radius-pill: 16px;
+  --radius-frame: 10px;
+
+  /* Elevation, for the same two components and the same reason. The rest of the
+     site separates with a border and never with a shadow (§3.4) — these exist
+     so the active pill can lift off the rail the way the reference does.
+     Cast in void rather than black, and the glow in violet-hot, so both sit in
+     the palette instead of greying it. */
+  --shadow-soft: 0 1px 2px rgb(12 10 20 / 0.3), 0 10px 30px -16px rgb(12 10 20 / 0.55);
+  --shadow-glow: 0 18px 40px -16px rgb(138 115 255 / 0.45);
 
   --container-content: 1280px;
 
@@ -100,4 +154,18 @@
   --ease-plate: cubic-bezier(0.2, 0, 0, 1);
   --duration-micro: 160ms;
   --duration-deliberate: 900ms;
+
+  /* The third clock, and the reason it is not one of the two above.
+     §7.4's pair covers a state change the reader caused and the two set-pieces.
+     The About reveal is neither: it is a block arriving under the reader as
+     they scroll past it, so it has to be slow enough to read as arriving rather
+     than blinking, and eased to a stop rather than into one. Quintic ease-out —
+     almost all of the distance is covered in the first third, so the block is
+     effectively in place while the tail of the curve settles it. */
+  --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-reveal: 700ms;
+  /* The rail's pills. Slower than --duration-micro because the active pill is
+     changing fill, shadow and two nested colours at once, and 160ms reads as a
+     flicker across that many properties. */
+  --duration-tab: 300ms;
 }

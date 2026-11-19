@@ -3,9 +3,13 @@ import type { Polymorphic } from './polymorphic.js';
 
 type PlateOwnProps = {
   /** Force a surface. Omit to inherit the theme's ground. */
-  surface?: 'plate' | 'bone' | 'void';
+  surface?: 'plate' | 'bone' | 'void' | 'white' |(string & {});
   /** Pin the registration marks on, for a plate that is already the focus. */
   marked?: boolean;
+  /** The corner crosses assume a square corner — turn them off on a plate
+   *  that takes `rounded-frame` or another radius, where a mark would float
+   *  past the now-cut-away corner instead of sitting on it. */
+  marks?: boolean;
   className?: string;
   children?: ReactNode;
 };
@@ -19,6 +23,7 @@ export function Plate<T extends ElementType = 'div'>({
   as,
   surface = 'plate',
   marked = false,
+  marks = true,
   className = '',
   children,
   ...rest
@@ -28,7 +33,7 @@ export function Plate<T extends ElementType = 'div'>({
     <Tag
       data-surface={surface}
       data-marked={marked || undefined}
-      className={`marks border border-line bg-surface text-fg transition-colors duration-[160ms] ${className}`}
+      className={`${marks ? 'marks' : ''} border border-line bg-surface text-fg transition-colors duration-[160ms] ${className}`}
       {...rest}
     >
       {children}

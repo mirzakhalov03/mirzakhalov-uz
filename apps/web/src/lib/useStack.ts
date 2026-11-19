@@ -34,9 +34,18 @@ export function useStack(ref: RefObject<HTMLElement | null>, enabled: boolean) {
       let flow = stack.getBoundingClientRect().top + window.scrollY;
 
       for (const panel of Array.from(stack.children) as HTMLElement[]) {
-        const height = panel.offsetHeight;
+        /* The fractional height, not offsetHeight. Panels land on fractions all
+           the time — clamped type and a 100lvh floor rarely add up to a whole
+           pixel — and offsetHeight rounds. Round up and the panel pins that
+           fraction too high, so it holds with its last line short of the floor
+           and the panel underneath shows in the gap; round down and it pins
+           low. Sub-pixel either way, but it is a seam in the one place the
+           stack promises there is none, and the error in `flow` compounds down
+           the page: measured at 0.7px by the last panel, which every
+           `flowTopOf` park and every backward nav link then inherits. */
+        const height = panel.getBoundingClientRect().height;
         panel.style.setProperty('--stick-top', `${Math.min(0, view - height)}px`);
-        panel.dataset.flowTop = String(Math.round(flow));
+        panel.dataset.flowTop = String(flow);
 
         flow += height;
       }
