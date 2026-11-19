@@ -8,11 +8,13 @@ import type { Project } from './types.js';
  * Uzbek text uses U+02BB (ʻ) for oʻ and gʻ, not a straight apostrophe (§3.1).
  */
 export const projects: Project[] = [
-  /* 2026. The three that moved the work past "React developer who builds
-     sites": a platform with a queue and a model behind it, an agent that runs
-     as a daemon, and an API someone else also committed to. Each summary says
-     the one hard thing the project actually solved, because that is the part a
-     reviewer cannot get from the screenshot. */
+  /* 2026. The four that moved the work past "React developer who builds
+     sites": a platform with a queue and a model behind it, a clinic system with
+     an admin panel behind a role gate, an agent that runs as a daemon, and an
+     API someone else also committed to. Each summary says the one hard thing
+     the project actually solved, because that is the part a reviewer cannot get
+     from the screenshot — and each `tagline` says it again in one line, which is
+     all a card has room for. */
   {
     slug: 'quizflow',
     title: 'QuizFlow',
@@ -21,6 +23,15 @@ export const projects: Project[] = [
       en: 'Upload a PDF, a Notion page or your own notes and it returns a quiz — multiple choice, multi-select, true/false, or open-ended answers graded by a model. Generation runs on Lambda behind a job record the client polls, so a fifty-page upload never holds a request open. Built with five other engineers.',
       uz: 'PDF, Notion sahifasi yoki oʻz konspektingizni yuklaysiz — u test tuzib beradi. Ochiq savollarga berilgan javoblarni model baholaydi. Test tuzish Lambdada, navbat orqali ishlaydi.',
     },
+    tagline: {
+      en: 'Upload a PDF or your own notes and get a quiz back, open answers graded by a model.',
+      uz: 'PDF yoki konspektingizni yuklang — ochiq javoblarni model baholaydigan test qaytadi.',
+    },
+    highlights: [
+      { label: 'Fullstack', kind: 'scope' },
+      { label: 'React + Express', kind: 'stack' },
+      { label: 'AWS Lambda', kind: 'feature' },
+    ],
     stack: ['React 19', 'TypeScript', 'Express', 'Postgres', 'AWS Lambda'],
     tags: ['live'],
     links: {
@@ -35,6 +46,33 @@ export const projects: Project[] = [
     hasCaseStudy: false,
   },
   {
+    slug: 'otolor-uz',
+    title: 'Otolor.uz',
+    year: 2026,
+    summary: {
+      en: 'The site and the booking system for Otolor, an ENT clinic in Tashkent. A patient picks a branch, a doctor and a slot against that doctor’s real weekly schedule; behind a role-gated login the clinic runs its own doctors, services and categories. The schedule editor is the piece both halves depend on — what staff set is exactly what the calendar offers. Uzbek, Russian and English throughout.',
+      uz: 'Toshkentdagi Otolor LOR klinikasi uchun sayt va navbat tizimi. Bemor filial, shifokor va vaqtni shifokorning haqiqiy jadvaliga qarab tanlaydi; klinika esa shifokorlar, xizmatlar va toifalarni oʻz paneli orqali boshqaradi. Uch tilda.',
+    },
+    tagline: {
+      en: 'Booking and a role-gated admin panel for a Tashkent ENT clinic, in three languages.',
+      uz: 'Toshkentdagi LOR klinikasi uchun navbat tizimi va boshqaruv paneli, uch tilda.',
+    },
+    highlights: [
+      { label: 'Client work', kind: 'scope' },
+      { label: 'React + React Query', kind: 'stack' },
+      { label: 'Admin & RBAC', kind: 'feature' },
+    ],
+    stack: ['React 19', 'TypeScript', 'TanStack Query', 'Ant Design', 'SCSS'],
+    tags: ['live', 'client'],
+    links: { demo: 'https://otolor.uz', source: 'https://github.com/mirzakhalov03/Otolor-uz' },
+    cover: {
+      url: '/work/otolor-uz.jpg',
+      alt: 'Otolor.uz home page — “Otolor — Hayotdan bahra oling” beside the clinic’s doctors, with the booking button below',
+    },
+    featured: true,
+    hasCaseStudy: false,
+  },
+  {
     slug: 'nemo-ai',
     title: 'NemoAI',
     year: 2026,
@@ -42,13 +80,26 @@ export const projects: Project[] = [
       en: 'A Telegram assistant that persists: file-backed memory it reads and writes itself, cron reminders, vision on photos and PDFs, and read-only SQL over its own history — twenty-nine tools in one long-running Node daemon on the Claude Agent SDK. A TypeScript rebuild of a Python bot by Rustam Zokirov.',
       uz: 'Telegramdagi doimiy yordamchi: oʻzi oʻqib-yozadigan xotira fayllari, eslatmalar, suratlar va PDF bilan ishlash. Claude Agent SDK ustida qurilgan Node daemoni.',
     },
+    tagline: {
+      en: 'A Telegram assistant that remembers — twenty-nine tools in one long-running daemon.',
+      uz: 'Telegramdagi yordamchi: bitta uzluksiz daemon ichida yigirma toʻqqizta vosita.',
+    },
+    highlights: [
+      { label: 'Solo build', kind: 'scope' },
+      { label: 'Claude Agent SDK', kind: 'stack' },
+      { label: 'Telegram assistant', kind: 'feature' },
+    ],
     stack: ['TypeScript', 'Node.js', 'Claude Agent SDK', 'SQLite', 'Docker'],
     tags: ['live'],
     /* Private repository and no web surface to link — it lives in Telegram.
        The plate renders as a non-interactive article, which is correct: there
        is nothing honest to open. */
     links: {},
-    cover: null,
+    /* The mascot, not a screenshot: there is no web surface to photograph, and
+       a cropped chat transcript is unreadable at card size. Padded to 16:10
+       against --surface-well so the letterbox merges with the slot it sits in
+       rather than drawing a second rectangle. */
+    cover: { url: '/work/nemo-ai.jpg', alt: 'The NemoAI mascot — a clownfish wearing a headset, among chat bubbles' },
     featured: true,
     hasCaseStudy: false,
   },
@@ -60,6 +111,15 @@ export const projects: Project[] = [
       en: 'A URL shortener written with one other engineer. Eight-character nanoid codes that retry on a unique-constraint collision rather than trusting the odds, JWT sessions with refresh tokens in their own table, and a Drizzle-migrated Postgres schema behind an Express API.',
       uz: 'Havolalarni qisqartirish xizmati, ikki kishilik jamoada yozilgan. Sakkiz belgili kod, JWT sessiyalar va Postgres asosidagi Express API.',
     },
+    tagline: {
+      en: 'A URL shortener with collision-retrying codes and refresh-token sessions.',
+      uz: 'Havola qisqartirgich: toʻqnashuvda qayta urinadigan kodlar va yangilanuvchi sessiyalar.',
+    },
+    highlights: [
+      { label: 'Fullstack', kind: 'scope' },
+      { label: 'Express + Postgres', kind: 'stack' },
+      { label: 'JWT sessions', kind: 'feature' },
+    ],
     stack: ['React', 'TypeScript', 'Express', 'Drizzle', 'Postgres'],
     tags: ['live'],
     links: { demo: 'https://shorten.uz', source: 'https://github.com/mirzakhalov03/shorten-uz' },
@@ -79,6 +139,15 @@ export const projects: Project[] = [
       en: 'A booking system for a medical clinic in Tashkent. Patients choose a doctor, a date and a slot; the clinic receives the appointment without anyone picking up a phone.',
       uz: 'Toshkentdagi tibbiyot klinikasi uchun navbat tizimi. Bemor shifokorni, sanani va vaqtni tanlaydi — klinika buyurtmani qoʻngʻiroqsiz oladi.',
     },
+    tagline: {
+      en: 'A clinic booking flow — doctor, date, slot — that replaced the phone call.',
+      uz: 'Klinika uchun navbat oqimi: shifokor, sana, vaqt — qoʻngʻiroqsiz.',
+    },
+    highlights: [
+      { label: 'Client work', kind: 'scope' },
+      { label: 'ReactJS', kind: 'stack' },
+      { label: 'Booking system', kind: 'feature' },
+    ],
     stack: ['React', 'JavaScript', 'REST API'],
     tags: ['live', 'client'],
     links: { demo: 'https://www.ranograndmed.uz/', source: 'https://github.com/mirzakhalov03/RGM' },
@@ -98,7 +167,9 @@ export const projects: Project[] = [
     tags: ['live'],
     links: { demo: 'https://glowstore.vercel.app', source: 'https://github.com/mirzakhalov03/Glow-Store' },
     cover: { url: '/work/glow-store.jpg', alt: 'Glow Store product grid with filtering sidebar' },
-    featured: true,
+    /* Unfeatured when Otolor landed. The home grid holds five, and a storefront
+       against a public API is the weakest of six claims — it stays on /work. */
+    featured: false,
     hasCaseStudy: true,
   },
   {

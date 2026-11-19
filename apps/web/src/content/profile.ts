@@ -48,8 +48,11 @@ export const socials: Social[] = [
     handle: 'Javohir Mirzakhalov',
     url: 'https://www.linkedin.com/in/javohir-mirzakhalov',
   },
-  { label: 'Instagram', handle: '@mirzakhalov03', url: 'https://instagram.com/mirzakhalov03' },
-  { label: 'Email', handle: 'javohirmirzakhalov@gmail.com', url: 'mailto:javohirmirzakhalov@gmail.com' },
+  {
+    label: 'Email',
+    handle: 'javohirmirzakhalov@gmail.com',
+    url: 'mailto:javohirmirzakhalov@gmail.com',
+  },
 ];
 
 export const languages: Language[] = [
@@ -64,18 +67,18 @@ export const languages: Language[] = [
  * they were — a defect, not a style choice (§3.6).
  */
 export const stack: StackItem[] = [
-  { name: 'React', frequency: 'daily' },
-  { name: 'TypeScript', frequency: 'daily' },
-  { name: 'JavaScript', frequency: 'daily' },
-  { name: 'CSS', frequency: 'daily' },
-  { name: 'HTML', frequency: 'daily' },
-  { name: 'Git', frequency: 'daily' },
-  { name: 'Figma', frequency: 'often' },
-  { name: 'Redux', frequency: 'often' },
-  { name: 'SCSS', frequency: 'often' },
-  { name: 'Tailwind', frequency: 'often' },
-  { name: 'Next.js', frequency: 'often' },
-  { name: 'Ant Design', frequency: 'often' },
+  { name: 'React', group: 'core' },
+  { name: 'TypeScript', group: 'core' },
+  { name: 'JavaScript', group: 'core' },
+  { name: 'Node.js', group: 'core' },
+  { name: 'Express', group: 'core' },
+  { name: 'Next.js', group: 'core' },
+  { name: 'Tailwind', group: 'core' },
+  { name: 'Scss', group: 'core' },
+  { name: 'Claude', group: 'ai' },
+  { name: 'GitHub Copilot', group: 'ai' },
+  { name: 'Antigravity', group: 'ai' },
+  { name: 'Cursor', group: 'ai' },
 ];
 
 export const education: EducationEntry[] = [
@@ -85,7 +88,7 @@ export const education: EducationEntry[] = [
     from: '2024',
     to: '2028',
     detail: 'Computer science on INHA’s Korean curriculum, taught in English.',
-    lead: true,
+    image: { url: '/education/inha.svg', alt: 'INHA University in Tashkent logo' },
   },
   {
     org: "Najot Ta'lim",
@@ -94,21 +97,25 @@ export const education: EducationEntry[] = [
     to: '2024-09',
     detail:
       'Nine months of frontend, full time — JavaScript through to React, and the first place I shipped something somebody else had to maintain.',
+    image: { url: '/education/najotlogo.png', alt: "Najot Ta'lim logo" },
   },
   /* The other half of this is in `experience`: three years as a student here,
-     then a year teaching in the same building. */
+     then a year teaching in the same building. Rebranded to Dombit Education
+     since. */
   {
-    org: 'LangApex Edu-Center',
+    org: 'Dombit Education',
     qualification: 'English',
     from: '2019',
     to: '2022',
     detail: 'Three years of English here as a student, which is how I ended up teaching in it.',
+    image: { url: '/education/dombit-mark.svg', alt: 'Dombit Education logo' },
   },
 ];
 
 /**
- * A certificate carrying a `score` is drawn as a dimension row against its
- * scale; one without is drawn as a card.
+ * A certificate carrying a `score` renders as a stat tile; one without renders
+ * as a feature card. The first feature card takes the compact slot beside the
+ * stat tiles, and any further ones stack in the tall column beside it.
  */
 export const certificates: Certificate[] = [
   {
@@ -122,11 +129,23 @@ export const certificates: Certificate[] = [
     score: { value: 1330, scaleMin: 400, scaleMax: 1600, display: '1330' },
   },
   {
-    name: 'GPA',
-    score: { value: 4, scaleMin: 0, scaleMax: 4, display: '4.00' },
+    name: 'Claude Certified Architect — Foundations',
+    issuer: 'Anthropic',
+    url: 'https://www.credly.com/badges/baf0577e-d96a-4196-ac7d-7b4d0fe676ad/linked_in_profile',
+    image: { url: '/certs/cca-f.png', alt: 'Claude Certified Architect badge' },
   },
-  { name: 'Node.js Mastery', issuer: 'Udemy' },
-  { name: 'Certified Claude Architect', issuer: 'Anthropic' },
+  {
+    name: 'Claude with Anthropic API',
+    image: {
+      url: '/certs/claude-anthropic-api.jpeg',
+      alt: 'Claude with the Anthropic API certificate',
+    },
+  },
+  {
+    name: 'NodeJS Mastery',
+    url: 'https://ude.my/UC-e8e03d73-adba',
+    image: { url: '/certs/nodejs-mastery.jpg', alt: 'NodeJS — The Complete Guide certificate' },
+  },
 ];
 
 /** Reverse chronological — the timeline reads newest at the top. */
@@ -137,6 +156,7 @@ export const experience: ExperienceEntry[] = [
     from: '2026-03',
     to: null,
     detail: 'Building product interfaces in React and TypeScript.',
+    image: { url: '/experience/vention.jpg', alt: 'Vention logo' },
   },
   {
     org: 'SATashkent',
@@ -144,6 +164,23 @@ export const experience: ExperienceEntry[] = [
     from: '2025-11',
     to: '2026-03',
     detail: 'Frontend for the platform students use to prepare for the SAT.',
+    image: { url: '/experience/satashkent.jpg', alt: 'SATashkent logo' },
+  },
+  {
+    org: 'Speaklish',
+    role: 'Frontend Engineer',
+    from: '2025-03',
+    to: '2025-08',
+    note: 'startup',
+    image: { url: '/experience/speaklish.png', alt: 'Speaklish logo' },
+  },
+  {
+    org: 'Monic.AI',
+    role: 'Frontend Engineer',
+    from: '2025-03',
+    to: '2025-08',
+    note: 'US startup',
+    image: { url: '/experience/monic-ai.jpg', alt: 'Monic.AI logo' },
   },
   {
     org: 'Ziyokor Education',
@@ -152,13 +189,17 @@ export const experience: ExperienceEntry[] = [
     to: '2024',
     detail:
       'IELTS preparation and general English, mostly with teenagers sitting the exam that year.',
+    image: { url: '/experience/ziyokor.jpg', alt: 'Ziyokor Education logo' },
   },
+  /* Same building as `education`'s Dombit Education entry — rebranded from
+     LangApex Edu-Center since. Reuses that entry's logo. */
   {
-    org: 'LangApex Edu-Center',
+    org: 'Dombit Education',
     role: 'ESL teacher',
     from: '2022',
     to: '2023',
     detail: 'General English, in the classes I had been sitting in three years earlier.',
+    image: { url: '/education/dombit-mark.svg', alt: 'Dombit Education logo' },
   },
 ];
 
