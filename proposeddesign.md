@@ -268,6 +268,28 @@ of anchors rather than an ARIA tablist: every chapter stays in the DOM, so
 
 No hamburger at any width. Four short mono items fit as a horizontally scrollable row on mobile — one tap instead of two. The Laugh Challenge lives in the footer, keeping its odd-one-out character without competing with primary nav.
 
+> **Amended 2026-09-14 — a hamburger below `sm`.** The rule above was written
+> for a bar carrying four items and a `⌘K` button. It now carries five
+> (`About · Projects · Media · Blog · Contact`) and a filled *Say Hi* CTA, and
+> the row's `overflow-x-auto` hides its scrollbar — so on a phone `Contact` sits
+> past the right edge with nothing on screen admitting it is there. A nav item
+> you cannot see is worse than one behind a button, so below 640px the section
+> links move into a panel.
+>
+> **What the original rule was protecting is kept.** The one-tap argument was
+> really about the primary action, and *Say Hi* stays in the bar at every width
+> — the panel holds sections only. Above 640px nothing changed: the mono row,
+> the drawing underline and the current-section state are exactly as specified
+> here.
+>
+> The panel is `<dialog>` + `showModal()`, as the command palette is, so the
+> focus trap, the inert background and Esc are the platform's. It is attached to
+> the bar rather than floating over the sheet, so it takes **no shadow** — §3.4's
+> exemption still belongs to the palette alone. The trigger is three hairlines
+> folding into a cross, which keeps §3.5's "no icon set" intact. Rows carry
+> their section number from `chrome/nav-items.ts`; note the sheets run 01–06 but
+> 05 is the Laugh interstitial and is not a nav target, so Contact is 06.
+
 > **Note on direction 01's margin rail:** dropped. Its wayfinding job is done here by the sticky bar's current-section underline plus the section numbers, and the command palette does the jumping far better. Carrying both would be redundant.
 
 ### 4.2 Home

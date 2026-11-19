@@ -4,6 +4,7 @@ import { Data } from '../../primitives/Data.js';
 import { Button } from '../ui/Button.js';
 import { Field } from '../ui/Field.js';
 import { Signature } from '../ui/Signature.js';
+import { SocialIcon } from '../ui/SocialIcon.js';
 import { socials } from '../../content/profile.js';
 
 type Errors = Partial<Record<'name' | 'message', string>>;
@@ -117,9 +118,12 @@ export function ContactSection() {
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-baseline justify-between gap-3 py-2 transition-colors duration-[160ms] hover:text-accent-text"
+                className="group flex items-center justify-between gap-3 py-2 transition-colors duration-[160ms] hover:text-accent-text"
               >
-                <Data tone="fg">{social.label}</Data>
+                <span className="flex items-center gap-2">
+                  <SocialIcon label={social.label} className="size-4 shrink-0" />
+                  <Data tone="fg">{social.label}</Data>
+                </span>
                 <span className="truncate text-body text-fg-muted group-hover:text-accent-text">
                   {social.handle}
                 </span>

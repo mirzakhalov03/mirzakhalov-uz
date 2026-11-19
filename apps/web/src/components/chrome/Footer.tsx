@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { Data } from '../../primitives/Data.js';
+import { SocialIcon } from '../ui/SocialIcon.js';
 import type { Social } from '../../content/types.js';
 import { profile, socials } from '../../content/profile.js';
 
@@ -14,7 +15,7 @@ import { profile, socials } from '../../content/profile.js';
  * profile.ts can never silently reshuffle the footer.
  */
 const DIRECT = ['Email', 'Telegram'];
-const ELSEWHERE = ['GitHub', 'LinkedIn', 'Instagram'];
+const ELSEWHERE = ['GitHub', 'LinkedIn'];
 
 const pick = (labels: string[]): Social[] =>
   labels.flatMap((label) => socials.filter((social) => social.label === label));
@@ -49,9 +50,12 @@ function Channels({
               rel="noopener noreferrer"
               className="group block transition-colors duration-[160ms] hover:text-accent-text"
             >
-              <Data size="lg" tone="fg" className="block group-hover:text-[var(--accent-text)]">
-                {social.label}
-              </Data>
+              <span className="flex items-center gap-1.5">
+                <SocialIcon label={social.label} className="size-3.5 shrink-0" />
+                <Data size="lg" tone="fg" className="group-hover:text-[var(--accent-text)]">
+                  {social.label}
+                </Data>
+              </span>
               {handles ? (
                 <Data className="block break-all group-hover:text-[var(--accent-text)]">
                   {social.handle}
