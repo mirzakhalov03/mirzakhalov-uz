@@ -4,6 +4,7 @@ import { authRouter } from './auth.routes.js';
 import { adminAssetRouter } from './admin-asset.routes.js';
 import { postRouter } from './post.routes.js';
 import { adminPostRouter } from './admin-post.routes.js';
+import { contactRouter } from './contact.routes.js';
 
 /**
  * Everything under /api/v1. Feature routers land here as milestones ship:
@@ -21,3 +22,5 @@ apiRouter.use(adminAssetRouter);
 apiRouter.use(postRouter);
 // M5 — blog, admin CRUD
 apiRouter.use(adminPostRouter);
+// M6 (partial) — contact relay; the admin inbox is still to come
+apiRouter.use(contactRouter);
