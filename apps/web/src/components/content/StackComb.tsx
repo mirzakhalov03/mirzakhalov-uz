@@ -17,9 +17,14 @@ import type { StackItem } from '../../content/types.js';
  * said what they were — a defect, not a style choice (§3.6). An icon replaces
  * the name for recognition, never for identification.
  *
- * Daily use keeps the violet marking it had in the matrix, moved from a left
- * edge to the cell's base facet — the one place on a hexagon where a straight
- * rule reads as part of the shape instead of a border stuck to it.
+ * Every cell carries a violet border and lifts a touch on hover, in the tool's
+ * own brand colour rather than the site's usual `currentColor` — a third-party
+ * logo reads as itself only when it keeps its own colour.
+ *
+ * AI tools sit in the same comb as the rest of the stack rather than a comb of
+ * their own — they are used the same way, daily, so splitting them out read as
+ * a distinction the work doesn't make. `data-group` tints their fill instead,
+ * just enough to tell the two apart without a second legend.
  */
 export function StackComb({ items }: { items: StackItem[] }) {
   return (
@@ -28,22 +33,25 @@ export function StackComb({ items }: { items: StackItem[] }) {
         const glyph = stackIcons[item.name];
 
         return (
-          <li key={item.name} className="comb__cell" data-frequency={item.frequency}>
-            {glyph ? (
-              <svg viewBox="0 0 24 24" className="comb__glyph" aria-hidden="true" focusable="false">
-                <path d={glyph} fill="currentColor" />
-              </svg>
-            ) : (
-              /* A tool with no mark yet still gets a cell, not a hole. */
-              <span className="comb__glyph comb__initial" aria-hidden="true">
-                {item.name.slice(0, 2)}
-              </span>
-            )}
+          <li key={item.name} className="comb__cell" data-group={item.group}>
+            {/* A brand mark keeps its own colour (see stack-icons.ts), so the
+                hover fill can sit close enough to wash it out. This hexagonal
+                plate gives every glyph a constant bone backdrop, independent
+                of the cell's own fill. */}
+            <span className="comb__glyph-plate">
+              {glyph ? (
+                <svg viewBox="0 0 24 24" className="comb__glyph" aria-hidden="true" focusable="false">
+                  <path d={glyph.d} fill={glyph.color} />
+                </svg>
+              ) : (
+                /* A tool with no mark yet still gets a cell, not a hole. */
+                <span className="comb__glyph comb__initial" aria-hidden="true">
+                  {item.name.slice(0, 2)}
+                </span>
+              )}
+            </span>
 
             <span className="comb__name">{item.name}</span>
-            <span className="sr-only">
-              {item.frequency === 'daily' ? '— daily use' : '— used often'}
-            </span>
           </li>
         );
       })}
@@ -56,14 +64,5 @@ export function StackComb({ items }: { items: StackItem[] }) {
  * of the comb — move one and the other has to move with it.
  */
 export function StackCombHeader({ items }: { items: StackItem[] }) {
-  const daily = items.filter((item) => item.frequency === 'daily').length;
-
-  return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <Data tone="accent">Stack — {items.length} tools</Data>
-      <Data>
-        <span className="comb-key" aria-hidden="true" /> {daily} daily
-      </Data>
-    </div>
-  );
+  return <Data tone="accent">Stack — {items.length} tools</Data>;
 }

@@ -178,41 +178,63 @@ come before `/posts/:slug`, or they 404 as "post not found".
   `ApiRequestError` carrying `status`, `code` and `fields`. `auth: true` opts a
   request into sending the admin cookie; public reads stay credential-free so
   they remain cacheable.
-- **`/#about` is a tab widget turned by scrolling.** One chapter is mounted at a
-  time, keyed on the active tab, so the reader can never see the tail of one
-  chapter and the head of the next. `AboutSection` owns the state; `AboutNav` is
-  a `role="tablist"` with roving tabindex and the sliding rail marker;
-  `AboutChapter` is the `tabpanel`; `AboutTurn` is the runway between two
-  chapters.
-  - **A chapter is not pinned to one screen.** Experience is ~1.5 viewports on
-    a desktop and nearer 3 on a phone, so chapters keep their natural height and
-    scroll normally. The turn happens on the runway past the end: an
-    `IntersectionObserver` at `threshold: 1` on the `AboutTurn` block (never a
-    scroll listener — §7.3), which then parks the new chapter at its top going
-    forward, or at its bottom coming back.
-  - **The reposition is hidden inside a cross-fade, never eased.** A scroll the
-    reader can see is a snap however slowly it runs, so the column fades to
-    opacity 0 (`LEAVE_MS`), the page is parked behind the blank, and the new
-    chapter fades in from the direction of travel (`--turn-dir`). The commit
-    rides `transitionend`, not a timer — the effect that would start the timer
-    runs after paint, so it can beat the transition it is timing by a frame, and
-    one frame early is exactly the jump being hidden. The timer is the fallback.
-  - Parking happens in a `useLayoutEffect`, before paint, using `flowTopOf` —
-    the panel's `data-flow-top` does not move when About's own height changes,
-    only the panels below it do, so the measurement is valid either side of the
-    swap and the panels that shift are off-screen while they do it.
-  - **The turn's own scroll looks like a gesture to the observer.** `parked`
-    holds where and when the page was last put somewhere — including arrival —
-    and a turn needs both `SETTLE_MS` and `SETTLE_PX` of the reader's own
-    movement past it. Arrival counts because on a viewport tall enough to hold a
-    short chapter and its runway at once, the observer's first callback would
-    otherwise turn the page on load. Where that geometry holds, scrolling does
-    not turn the section at all and the tabs are the way through — which is
-    honest: nothing inside a panel shorter than the screen moves anyway.
+- **`/#about` is a scroll-spy, not a tab widget.** Three chapters stacked down
+  one column with a rail beside them that follows the reader. The interaction is
+  ported from uyqulab.uz's section nav (`mirzakhalov03/uyqulab-uz`,
+  `components/home/SectionNav.tsx` + `hooks/useScrollSpy.ts`); keep them in mind
+  when changing this.
+  - **Nothing intercepts the scroll, and that is the whole design.** No wheel
+    listener, no `preventDefault`, no pinned panel, no parked page, no
+    `overscroll-behavior` lock. The chapters are three blocks in the flow and
+    the browser scrolls them. This replaced a one-chapter-at-a-time widget that
+    made the section its own scroll surface, where every frame was a negotiation
+    between the reader's gesture and the component — momentum, rubber-banding,
+    keyboard paging and find-in-page all cost something there and are free here.
+    **If a change starts by adding a scroll or wheel listener to this section,
+    it is reintroducing the thing that was removed.**
+  - `useScrollSpy` is an `IntersectionObserver` with `rootMargin:
+    '-30% 0px -60% 0px'` — a band 30–40% down the viewport, so a chapter goes
+    current as its top reaches the upper third. It keeps a visible *set* and
+    takes the first in document order; acting on each `isIntersecting` as it
+    arrives makes the answer depend on batch order and flickers at boundaries.
+    When nothing is in the band the last answer stands, so the rail is never
+    blank.
+  - **The rail is links, not tabs.** `role="tab"` was correct only while one
+    chapter was mounted and the others really were hidden. They are all in the
+    DOM now, so `<a href="#…">` with `aria-current` is the honest markup — it
+    works unhydrated, opens in a new tab, and needs no roving tabindex.
+  - Clicking uses **`scrollToFlow`, never `scrollIntoView`** — the panel is
+    sticky and `scrollIntoView` concludes a pinned target is already in view and
+    does nothing (`scroll-to-flow.ts`). The offset is `clearance(nav) - the
+    chapter's own padding-top`: measured chrome, minus the box's air, so the
+    accent bar lands a module under the furniture instead of a third of a screen
+    below it. `scroll-margin-top` on the chapter is the fallback for the
+    browser's *native* anchor jump, which is the only thing that honours it.
+  - **`Reveal` is the one place content animates because it scrolled into
+    view**, which §2 principle 4 otherwise forbids. One-shot — the observer
+    disconnects on fire, so scrolling back finds the section as it was left.
+    `will-change` is set on the pending state only and released by `.is-shown`;
+    left on permanently every revealed block keeps a compositor layer for the
+    life of the page.
+  - **Two named radii and two shadows exist for this rail and nothing else**
+    (`--radius-pill`, `--radius-chip`, `--shadow-soft`, `--shadow-glow`), a
+    deliberate override of §3.4's "radius 0, no exceptions" and "separation from
+    the border, never elevation". `--radius-*: initial` still deletes Tailwind's
+    default radius scale, so only these two are generated and a third has to be
+    added on purpose.
   - Selected state is `background: var(--accent-text); color: var(--surface)`.
     `--accent-text` is by definition this ground's accent at text contrast
     against `--surface`, so inverting the pair is contrast-correct on bone and
-    void alike. `--accent` as a fill lands at 4.1:1 and is not.
+    void alike. `--accent` as a fill lands at 4.1:1 and is not. The icon chip on
+    a selected pill *darkens* (`color-mix` with `--surface`) rather than
+    lightening as the reference does, because here the fill is the light half of
+    the pair.
+  - Below `lg` the rail is a horizontal strip that overflows a phone. The active
+    pill is scrolled into view by `scrollLeft` on the strip — never
+    `scrollIntoView`, which would move the page too — guarded on the strip
+    actually overflowing, which is what makes one effect correct at both widths
+    without a media query. A mask fades its right edge, because a pill cut dead
+    at the viewport edge reads as a clipping bug rather than as "there is more".
   - Info boxes inside the band are `<Plate surface="bone">`. On void,
     `--surface-raised` is one step off the ground — it separates, but it does
     not make anything readable.
@@ -223,8 +245,8 @@ come before `/posts/:slug`, or they 404 as "post not found".
   (`calc(var(--text-h2) * 1.02 + var(--spacing) * 3)`) so nothing has to read
   layout on a scroll frame — which is why the prop only suits a head that stays
   one line: give a `stickyHead` section a lede, or an aside that wraps, and the
-  number silently stops being true. `AboutSection.stuckHeight()` takes the real
-  `offsetHeight` instead, because it runs once per turn and can afford to.
+  number silently stops being true. `AboutNav.clearance()` takes the real
+  `offsetHeight` instead, because it runs once per click and can afford to.
 - **`/admin/*` is `React.lazy`-loaded** in `routes/router.tsx` so the admin bundle
   never reaches a public visitor.
 - **Relative imports carry a `.js` extension**, including from `.tsx` files

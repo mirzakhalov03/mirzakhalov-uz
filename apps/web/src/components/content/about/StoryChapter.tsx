@@ -16,7 +16,7 @@ import { languages, profile } from '../../../content/profile.js';
  */
 export function StoryChapter() {
   return (
-    <AboutChapter id="about-story" title="Story" seed={1}>
+    <AboutChapter id="about-story" title="Story">
       <div className="grid gap-5 lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-8">
         <Prose className="border border-line p-3 lg:p-4">
           {profile.bio.en.map((paragraph) => (
